@@ -1,66 +1,65 @@
-# MiniBrowser Installation & Usage Guide
-## Quick Website Launcher & Auto Translator
+# MiniTranslator - Installation & User Guide
+
+A lightweight utility for instant, hotkey-based text translation.
 
 ## Quick Start
 
-### Option 1: Download Pre-built Executable (Recommended)
-1. Go to the [Releases](../../releases) section on GitHub
-2. Download the latest `MiniTranslator.exe` from the release assets
-3. Double-click `MiniTranslator.exe` to start the application
-4. The application will start minimized in the system tray (look for a teal/white icon)
-5. Press **Ctrl+Q** to activate translation mode (default)
+1.  **Download**: Go to the [Releases](../../releases) page and download the latest `MiniTranslator-vX.X.zip` file.
+2.  **Extract**: Extract the `publish` folder from the `.zip` file to a permanent location on your computer (e.g., `C:\Program Files\MiniTranslator`).
+3.  **Run**: Double-click `MiniTranslator.exe` to start the application.
+4.  **Tray Icon**: A blue "T" icon will appear in your system tray (bottom-right corner of your screen).
 
-### Option 2: Build from Source
-1. Clone this repository
-2. Open the project in Visual Studio or use .NET CLI
-3. Build the project: `dotnet publish -c Release -r win-x64 --self-contained`
-4. Navigate to `bin/Release/net6.0-windows/win-x64/publish/`
-5. Run `MiniTranslator.exe`
+## How to Use
 
-### Option 3: Use the Batch File
-1. Double-click `run-minitranslator.bat` in the project root (if available)
-2. This will start the application and show helpful instructions
+1.  **Copy Text**: Highlight text in any application (your browser, a PDF, a code editor, etc.) and press `Ctrl+C`.
+2.  **Press Hotkey**: Press the global hotkey (default is `Ctrl+Q`).
+3.  **Get Translation**: A clean, minimal browser window will pop up with the translated text.
 
-## First Time Setup
+## Configuration
 
-### Translation Mode (Default & Recommended)
-1. Look for the blue "T" icon in your system tray (bottom-right corner)
-2. Right-click the icon and select "Settings"
-3. **Translation Mode is enabled by default** - auto-translation functionality is ready
-4. Select your **Source Language** (e.g., English) and **Target Language** (e.g., Русский)
-5. Configure your keyboard shortcut (default: Ctrl+Q)
-6. Click "Test Translation" - copy some text first, then test
-7. Click "OK" to save settings
+All settings can be configured by right-clicking the tray icon.
 
-### Alternative: Custom Website Mode
-- **Uncheck "Translation Mode"** to switch to custom website launching
-- Enter your preferred website URL (e.g., `https://gmail.com`, `https://youtube.com`)
-- Click "Test Custom Website" to verify your URL works
-- Configure hotkey and save
+### Quick Settings (via Right-Click Menu)
 
-## Using the Application
+For fast adjustments, you can change the most common settings directly from the tray menu:
+- **Translator**: Switch between `Google Translate` and `Yandex Translate`.
+- **Browser**: Choose whether to open translations in `Chrome`, `Edge`, or your `Default` system browser.
+- **Source Language**: Set the language you are translating *from*.
+- **Target Language**: Set the language you want to translate *to*.
 
-### Translation Mode (Default)
-1. **Copy text** you want to translate (Ctrl+C)
-2. **Press your hotkey** (default: Ctrl+Q) from anywhere in Windows
-3. **Yandex Translate opens** in app mode with your text pre-loaded
-4. **Translation appears** instantly in your configured target language
+Your selection is saved instantly.
 
-### Custom Website Mode
-- **Global Hotkey**: Press your configured shortcut anywhere in Windows  
-- **Manual**: Right-click the tray icon and select "Open/Translate"
-- **Double-click**: Double-click the tray icon
+### Main Settings (Settings Window)
 
-### Managing the Application
-- **Settings**: Right-click tray icon → "Settings"
-- **Exit**: Right-click tray icon → "Exit"
+For more options, right-click the tray icon and select **"Settings"**:
+- **Global Hotkey**: Configure the keyboard shortcut that triggers the translation.
+- **Browser Window Size**: Set the default width and height of the translation window.
+- **Run at Windows startup**: Check this box to have MiniTranslator start automatically when you log in to Windows.
+- **Test Button**: A "Test Translation" button is available to verify your settings with text from your clipboard.
 
-### Auto-Start with Windows (Optional)
-To have MiniTranslator start automatically when Windows boots:
+## Troubleshooting
 
-1. Press `Win+R`, type `shell:startup`, and press Enter
-2. Copy `MiniTranslator.exe` from the `publish/` folder to the Startup folder
-3. The application will now start with Windows
+### Hotkey Not Working?
+- Another application might be using the same key combination. Try choosing a different hotkey in the Settings window.
+- Make sure at least one modifier key (Ctrl, Alt, Shift, Win) is selected.
+
+### Can't Find the Tray Icon?
+- Look in the system tray overflow area by clicking the small `^` arrow in the bottom-right corner of your screen.
+
+### Translation Not Working?
+- Make sure you have copied text to your clipboard *before* pressing the hotkey.
+- In the Settings window, use the "Test Translation" button to see if it's a clipboard issue or a settings issue.
+- Verify that both a source and target language are selected.
+
+### Application Won't Start?
+- Check your system tray to see if it's already running. Only one instance of the application can run at a time.
+
+## Uninstalling
+
+1.  If the application is running, right-click the tray icon and select "Exit".
+2.  Delete the folder where you extracted the application files.
+3.  To remove saved settings, delete the folder at `%APPDATA%\MiniTranslator`.
+4.  If you enabled "Run at Windows startup," open the Settings window and uncheck the box before exiting the application to remove the registry key.
 
 ## Features
 
@@ -76,43 +75,9 @@ To have MiniTranslator start automatically when Windows boots:
 ✅ **Dual Mode** - Switch between website launcher and translator functionality
 ✅ **Multi-Language** - Support for 70+ languages including English, Russian, Spanish, etc.
 
-## Troubleshooting
-
-### Hotkey Not Working?
-- Another application might be using the same combination
-- Try a different key combination in Settings
-- Make sure at least one modifier key is selected
-
-### Can't Find the Tray Icon?
-- Look in the system tray (bottom-right corner)
-- Click the small arrow (^) to show hidden icons
-- The icon is a blue square with a white "B"
-
-### Website Won't Open?
-- Check that the URL is valid using the "Test URL" button
-- Make sure you have an internet connection
-- Try adding `https://` to the beginning of the URL
-
-### Browser Compatibility
-- **Best Experience**: Google Chrome or Microsoft Edge installed
-- **App Mode**: Websites open in clean, minimal windows without toolbars
-- **Fallback**: Uses default browser if Chrome/Edge not available
-- **Auto-Detection**: Automatically finds and uses Chrome or Edge
-
-### Translation Not Working?
-- Make sure you have **copied text to clipboard** before pressing the hotkey
-- **Check language settings** - both source and target languages must be selected
-- **Enable Translation Mode** in settings if not already enabled
-- Try the **"Test Translation"** button in settings with some copied text
-
-### Application Won't Start?
-- Check if it's already running in the system tray
-- Only one instance can run at a time
-- Try running as administrator if needed
-
 ## Configuration File
 
-Settings are stored in: `%APPDATA%\MiniBrowser\settings.json`
+Settings are stored in: `%APPDATA%\MiniTranslator\settings.json`
 
 Example configurations:
 
@@ -169,12 +134,6 @@ Example configurations:
 - **French → English** (fr → en)
 - **German → English** (de → en)
 - **Japanese → English** (ja → en)
-
-## Uninstalling
-
-1. Right-click the tray icon and select "Exit"
-2. Delete the MiniTranslator folder
-3. Optionally delete settings: `%APPDATA%\MiniBrowser\`
 
 ---
 

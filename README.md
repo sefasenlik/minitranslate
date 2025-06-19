@@ -1,101 +1,51 @@
-# MiniBrowser - Quick Website Launcher & Auto Translator
+# MiniTranslator - Quick Translation Hotkey
 
-A lightweight Windows application that allows you to quickly open any website using a configurable keyboard shortcut, or instantly translate clipboard text using Yandex Translate.
+A lightweight Windows utility that lets you instantly translate clipboard text using a global keyboard shortcut. Choose between Google Translate or Yandex Translate and get instant translations from any application.
+
+![MiniTranslator Screenshot](https://i.imgur.com/your-screenshot.png) <!-- It's recommended to add a real screenshot of your app's settings window -->
 
 ## Features
 
-- **Global Hotkey**: Works system-wide, even when the application isn't focused
-- **Configurable**: Change both the website URL and keyboard shortcut
-- **System Tray**: Runs quietly in the background
-- **Single Instance**: Only one copy runs at a time
-- **Default Shortcut**: Ctrl+Q (configurable)
-- **App Mode**: Opens websites in minimal browser windows without toolbars (Chrome/Edge)
-- **Clean UI**: No address bar, bookmarks, or browser chrome - just the website content
-- **Auto Translation**: Instant clipboard text translation with configurable languages
-- **Dual Mode**: Switch between website launcher and translator modes
+- **Global Hotkey**: Works system-wide (default: `Ctrl+Q`).
+- **Dual Translators**: Choose between Google Translate and Yandex Translate.
+- **Browser Choice**: Launch translations in Chrome, Edge, or your default browser.
+- **System Tray Menu**: Runs quietly in the system tray. Right-click the icon to change settings on the fly.
+- **Configurable Languages**: Set your default source and target languages.
+- **Run at Startup**: Optionally set the application to start with Windows.
+- **App Mode**: Opens translations in a clean, minimal browser window.
+- **Single Instance**: Prevents multiple copies of the app from running.
 
-## Building the Application
+## Installation & Usage
+
+1.  **Download**: Go to the [Releases](../../releases) page and download the latest `.zip` file.
+2.  **Extract**: Unzip the contents to a folder on your computer.
+3.  **Run**: Double-click `MiniTranslator.exe`. The application icon (a blue 'T') will appear in your system tray.
+
+### How to Translate
+1.  **Copy Text**: Highlight text in any application and press `Ctrl+C`.
+2.  **Press Hotkey**: Press your configured hotkey (e.g., `Ctrl+Q`).
+3.  **Get Translation**: A minimal browser window will open with the translation.
+
+### Changing Settings
+- **Quick Settings**: Right-click the tray icon to instantly change your Translator, Browser, Source Language, or Target Language.
+- **Full Settings**: Right-click the tray icon and select "Settings" to configure the hotkey, window size, and startup options.
+
+## Building from Source
 
 ### Prerequisites
 - .NET 6.0 SDK or later
 - Windows 10/11
 
 ### Build Instructions
-
-1. Open a command prompt in the project directory
-2. Run the following command:
-```bash
-dotnet build -c Release
-```
-
-3. The executable will be created in `bin/Release/net6.0-windows/`
-
-### Creating a Standalone Executable
-
-To create a self-contained executable that doesn't require .NET to be installed:
-
-```bash
-dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true
-```
-
-The standalone executable will be in `bin/Release/net6.0-windows/win-x64/publish/`
-
-## Usage
-
-1. **Starting the Application**: Double-click `MiniBrowser.exe`
-   - The application will start minimized in the system tray
-   - Look for the blue "B" icon in your system tray
-
-2. **Using the Hotkey**: 
-   - Press Ctrl+Q (default) to open the configured website
-   - The hotkey works globally, even when other applications are focused
-
-3. **Configuring Settings**:
-   - Right-click the system tray icon
-   - Select "Settings"
-   - Change the website URL and/or keyboard shortcut
-   - Click "OK" to save
-
-4. **Manual Launch**:
-   - Right-click the system tray icon
-   - Select "Open Website"
-
-5. **Exiting**:
-   - Right-click the system tray icon
-   - Select "Exit"
+1.  Clone the repository and open a command prompt in the project directory.
+2.  Run the publish command to create a self-contained executable:
+    ```bash
+    dotnet publish -c Release -r win-x64 --self-contained
+    ```
+3.  The final application will be located in `bin/Release/net6.0-windows/win-x64/publish/`.
 
 ## Configuration
-
-Settings are automatically saved to:
-`%APPDATA%/MiniBrowser/settings.json`
-
-The configuration includes:
-- `WebsiteUrl`: The website to open (default: https://www.google.com)
-- `HotkeyModifiers`: Modifier keys (Ctrl, Alt, Shift, Win)
-- `HotkeyKey`: The main key to press
-
-## Examples
-
-- **Ctrl+Q**: Open Google (default)
-- **Alt+G**: Open Gmail
-- **Ctrl+Shift+Y**: Open YouTube
-- **Win+B**: Open any bookmarked site
-
-## Troubleshooting
-
-**Hotkey not working?**
-- The hotkey combination might be already used by another application
-- Try a different combination in Settings
-- Make sure at least one modifier key (Ctrl, Alt, Shift, Win) is selected
-
-**Application not starting?**
-- Check if it's already running in the system tray
-- Only one instance can run at a time
-
-**Website not opening?**
-- Make sure the URL is valid
-- Use the "Test URL" button in Settings to verify
-- URLs without http:// or https:// will automatically get https:// added
+Settings are automatically saved to `%APPDATA%\MiniTranslator\settings.json`. It's recommended to manage these through the application's settings window.
 
 ## License
 

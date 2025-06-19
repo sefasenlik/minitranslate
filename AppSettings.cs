@@ -12,17 +12,28 @@ namespace MiniTranslator
         Default
     }
 
+    public enum TranslatorType
+    {
+        Yandex,
+        Google
+    }
+
     public class AppSettings
     {
-        public string WebsiteUrl { get; set; } = "https://www.google.com";
         public int HotkeyModifiers { get; set; } = 0x0002; // MOD_CONTROL
         public int HotkeyKey { get; set; } = (int)Keys.Q;
         public string SourceLanguage { get; set; } = "en";
         public string TargetLanguage { get; set; } = "ru";
-        public bool UseTranslateMode { get; set; } = true;
+        public TranslatorType PreferredTranslator { get; set; } = TranslatorType.Yandex;
         public int WindowWidth { get; set; } = 1200;
         public int WindowHeight { get; set; } = 800;
         public BrowserType PreferredBrowser { get; set; } = BrowserType.Chrome;
+
+        // Legacy properties for backward compatibility
+        [JsonIgnore]
+        public string WebsiteUrl { get; set; } = ""; // Will be ignored
+        [JsonIgnore]
+        public bool UseTranslateMode { get; set; } = true; // Will be ignored
 
         private static readonly string SettingsPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),

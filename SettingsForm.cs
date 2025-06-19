@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using System.IO;
+using Microsoft.Win32;
 
 namespace MiniTranslator
 {
@@ -8,7 +10,6 @@ namespace MiniTranslator
     {
         public AppSettings Settings { get; private set; }
 
-        private TextBox urlTextBox;
         private CheckBox ctrlCheckBox;
         private CheckBox altCheckBox;
         private CheckBox shiftCheckBox;
@@ -16,7 +17,7 @@ namespace MiniTranslator
         private ComboBox keyComboBox;
         private ComboBox sourceLanguageCombo;
         private ComboBox targetLanguageCombo;
-        private CheckBox translateModeCheckBox;
+        private ComboBox translatorComboBox;
         private TrackBar widthSlider;
         private TrackBar heightSlider;
         private Label widthLabel;
@@ -25,6 +26,7 @@ namespace MiniTranslator
         private Button okButton;
         private Button cancelButton;
         private Button testButton;
+        private CheckBox startupCheckBox;
 
         // Hotkey modifiers
         private const int MOD_CONTROL = 0x0002;
@@ -32,16 +34,18 @@ namespace MiniTranslator
         private const int MOD_SHIFT = 0x0004;
         private const int MOD_WIN = 0x0008;
 
+        private const string AppName = "MiniTranslator";
+        private static readonly RegistryKey StartupRegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
+
         public SettingsForm(AppSettings currentSettings)
         {
             Settings = new AppSettings
             {
-                WebsiteUrl = currentSettings.WebsiteUrl,
                 HotkeyModifiers = currentSettings.HotkeyModifiers,
                 HotkeyKey = currentSettings.HotkeyKey,
                 SourceLanguage = currentSettings.SourceLanguage,
                 TargetLanguage = currentSettings.TargetLanguage,
-                UseTranslateMode = currentSettings.UseTranslateMode,
+                PreferredTranslator = currentSettings.PreferredTranslator,
                 WindowWidth = currentSettings.WindowWidth,
                 WindowHeight = currentSettings.WindowHeight,
                 PreferredBrowser = currentSettings.PreferredBrowser
@@ -54,35 +58,44 @@ namespace MiniTranslator
         private void InitializeComponent()
         {
             this.Text = "MiniTranslator Settings";
-            this.Size = new Size(490, 520);
+            this.Size = new Size(490, 460);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.StartPosition = FormStartPosition.CenterScreen;
 
-            // Translation mode checkbox
-            translateModeCheckBox = new CheckBox
+            // Translator selection
+            var translatorLabel = new Label
             {
-                Text = "Translation Mode (translates clipboard text via Yandex)",
+                Text = "Translation Service:",
                 Location = new Point(20, 20),
-                Size = new Size(340, 23),
+                Size = new Size(120, 23),
                 Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold)
             };
-            translateModeCheckBox.CheckedChanged += TranslateModeCheckBox_CheckedChanged;
-            this.Controls.Add(translateModeCheckBox);
+            this.Controls.Add(translatorLabel);
+
+            translatorComboBox = new ComboBox
+            {
+                Location = new Point(145, 20),
+                Size = new Size(120, 23),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            translatorComboBox.Items.Add("Yandex Translate");
+            translatorComboBox.Items.Add("Google Translate");
+            this.Controls.Add(translatorComboBox);
 
             // Translation settings
             var sourceLabel = new Label
             {
                 Text = "Source Language:",
-                Location = new Point(40, 50),
+                Location = new Point(20, 55),
                 Size = new Size(110, 23)
             };
             this.Controls.Add(sourceLabel);
 
             sourceLanguageCombo = new ComboBox
             {
-                Location = new Point(155, 50),
+                Location = new Point(135, 55),
                 Size = new Size(85, 23),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
@@ -91,14 +104,14 @@ namespace MiniTranslator
             var targetLabel = new Label
             {
                 Text = "Target Language:",
-                Location = new Point(250, 50),
+                Location = new Point(235, 55),
                 Size = new Size(110, 23)
             };
             this.Controls.Add(targetLabel);
 
             targetLanguageCombo = new ComboBox
             {
-                Location = new Point(365, 50),
+                Location = new Point(350, 55),
                 Size = new Size(85, 23),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
@@ -107,38 +120,113 @@ namespace MiniTranslator
             // Populate language combo boxes after they're created and added
             PopulateLanguageComboBoxes();
 
-            // Website URL (for custom website mode)
-            var urlLabel = new Label
-            {
-                Text = "Custom Website URL:",
-                Location = new Point(20, 90),
-                Size = new Size(130, 23)
-            };
-            this.Controls.Add(urlLabel);
-
-            urlTextBox = new TextBox
-            {
-                Location = new Point(20, 115),
-                Size = new Size(360, 23),
-                PlaceholderText = "https://www.example.com (for Custom Website Mode)"
-            };
-            this.Controls.Add(urlTextBox);
-
             // Test button
             testButton = new Button
             {
-                Text = "Test",
-                Location = new Point(305, 145),
-                Size = new Size(75, 25)
+                Text = "Test Translation",
+                Location = new Point(20, 340),
+                Size = new Size(120, 30),
+                BackColor = Color.FromArgb(225, 240, 255),
+                FlatStyle = FlatStyle.Flat,
             };
+            testButton.FlatAppearance.BorderColor = Color.FromArgb(173, 216, 230);
+            testButton.FlatAppearance.BorderSize = 1;
             testButton.Click += TestButton_Click;
             this.Controls.Add(testButton);
+
+            // Hotkey section
+            var hotkeyLabel = new Label
+            {
+                Text = "Global Hotkey:",
+                Location = new Point(20, 130),
+                Size = new Size(100, 23),
+                Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold)
+            };
+            this.Controls.Add(hotkeyLabel);
+
+            // Modifier checkboxes
+            ctrlCheckBox = new CheckBox
+            {
+                Text = "Ctrl",
+                Location = new Point(30, 155),
+                Size = new Size(50, 23)
+            };
+            ctrlCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
+            this.Controls.Add(ctrlCheckBox);
+
+            altCheckBox = new CheckBox
+            {
+                Text = "Alt",
+                Location = new Point(85, 155),
+                Size = new Size(45, 23)
+            };
+            altCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
+            this.Controls.Add(altCheckBox);
+
+            shiftCheckBox = new CheckBox
+            {
+                Text = "Shift",
+                Location = new Point(135, 155),
+                Size = new Size(50, 23)
+            };
+            shiftCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
+            this.Controls.Add(shiftCheckBox);
+
+            winCheckBox = new CheckBox
+            {
+                Text = "Win",
+                Location = new Point(190, 155),
+                Size = new Size(55, 23)
+            };
+            winCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
+            this.Controls.Add(winCheckBox);
+
+            // Key selection
+            var keyLabel = new Label
+            {
+                Text = "Key:",
+                Location = new Point(250, 155),
+                Size = new Size(30, 23)
+            };
+            this.Controls.Add(keyLabel);
+
+            keyComboBox = new ComboBox
+            {
+                Location = new Point(285, 155),
+                Size = new Size(60, 23),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            keyComboBox.SelectedIndexChanged += UpdateCurrentHotkeyDisplay;
+            this.Controls.Add(keyComboBox);
+
+            PopulateKeyComboBox();
+
+            // Browser selection
+            var browserLabel = new Label
+            {
+                Text = "Preferred Browser:",
+                Location = new Point(20, 190),
+                Size = new Size(120, 23),
+                Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Bold)
+            };
+            this.Controls.Add(browserLabel);
+
+            browserComboBox = new ComboBox
+            {
+                Location = new Point(145, 190),
+                Size = new Size(120, 23),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            browserComboBox.Items.Add("Chrome");
+            browserComboBox.Items.Add("Edge");
+            browserComboBox.Items.Add("Default Browser");
+            this.Controls.Add(browserComboBox);
 
             // Window Size section
             var windowSizeLabel = new Label
             {
                 Text = "Browser Window Size:",
-                Location = new Point(20, 180),
+                Location = new Point(20, 225),
                 Size = new Size(150, 23)
             };
             this.Controls.Add(windowSizeLabel);
@@ -147,14 +235,14 @@ namespace MiniTranslator
             var widthSizeLabel = new Label
             {
                 Text = "Width:",
-                Location = new Point(20, 205),
+                Location = new Point(20, 250),
                 Size = new Size(50, 23)
             };
             this.Controls.Add(widthSizeLabel);
 
             widthSlider = new TrackBar
             {
-                Location = new Point(75, 205),
+                Location = new Point(75, 250),
                 Size = new Size(200, 45),
                 Minimum = 300,
                 Maximum = 1920,
@@ -167,7 +255,7 @@ namespace MiniTranslator
             widthLabel = new Label
             {
                 Text = "1200px",
-                Location = new Point(285, 215),
+                Location = new Point(285, 260),
                 Size = new Size(60, 23)
             };
             this.Controls.Add(widthLabel);
@@ -176,14 +264,14 @@ namespace MiniTranslator
             var heightSizeLabel = new Label
             {
                 Text = "Height:",
-                Location = new Point(20, 245),
+                Location = new Point(20, 290),
                 Size = new Size(50, 23)
             };
             this.Controls.Add(heightSizeLabel);
 
             heightSlider = new TrackBar
             {
-                Location = new Point(75, 245),
+                Location = new Point(75, 290),
                 Size = new Size(200, 45),
                 Minimum = 300,
                 Maximum = 1080,
@@ -196,97 +284,17 @@ namespace MiniTranslator
             heightLabel = new Label
             {
                 Text = "800px",
-                Location = new Point(285, 255),
+                Location = new Point(285, 300),
                 Size = new Size(60, 23)
             };
             this.Controls.Add(heightLabel);
-
-            // Browser selection
-            var browserLabel = new Label
-            {
-                Text = "Preferred Browser:",
-                Location = new Point(20, 295),
-                Size = new Size(120, 23)
-            };
-            this.Controls.Add(browserLabel);
-
-            browserComboBox = new ComboBox
-            {
-                Location = new Point(150, 295),
-                Size = new Size(100, 23),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            browserComboBox.Items.Add("Chrome");
-            browserComboBox.Items.Add("Edge");
-            browserComboBox.Items.Add("Default Browser");
-            this.Controls.Add(browserComboBox);
-
-            // Hotkey section
-            var hotkeyLabel = new Label
-            {
-                Text = "Keyboard Shortcut:",
-                Location = new Point(20, 325),
-                Size = new Size(120, 23)
-            };
-            this.Controls.Add(hotkeyLabel);
-
-            // Modifier checkboxes
-            ctrlCheckBox = new CheckBox
-            {
-                Text = "Ctrl",
-                Location = new Point(20, 350),
-                Size = new Size(60, 23)
-            };
-            this.Controls.Add(ctrlCheckBox);
-
-            altCheckBox = new CheckBox
-            {
-                Text = "Alt",
-                Location = new Point(85, 350),
-                Size = new Size(50, 23)
-            };
-            this.Controls.Add(altCheckBox);
-
-            shiftCheckBox = new CheckBox
-            {
-                Text = "Shift",
-                Location = new Point(140, 350),
-                Size = new Size(60, 23)
-            };
-            this.Controls.Add(shiftCheckBox);
-
-            winCheckBox = new CheckBox
-            {
-                Text = "Win",
-                Location = new Point(205, 350),
-                Size = new Size(50, 23)
-            };
-            this.Controls.Add(winCheckBox);
-
-            // Key selection
-            var keyLabel = new Label
-            {
-                Text = "Key:",
-                Location = new Point(20, 380),
-                Size = new Size(30, 23)
-            };
-            this.Controls.Add(keyLabel);
-
-            keyComboBox = new ComboBox
-            {
-                Location = new Point(55, 380),
-                Size = new Size(100, 23),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            PopulateKeyComboBox();
-            this.Controls.Add(keyComboBox);
 
             // Current hotkey display
             var currentLabel = new Label
             {
                 Text = "Current: Ctrl+Q",
-                Location = new Point(165, 383),
-                Size = new Size(150, 20),
+                Location = new Point(355, 155),
+                Size = new Size(100, 20),
                 ForeColor = Color.Blue
             };
             currentLabel.Name = "currentLabel";
@@ -296,28 +304,33 @@ namespace MiniTranslator
             okButton = new Button
             {
                 Text = "OK",
-                Location = new Point(255, 440),
-                Size = new Size(75, 30),
-                DialogResult = DialogResult.OK
+                Location = new Point(295, 340),
+                Size = new Size(75, 30)
             };
+            okButton.DialogResult = DialogResult.OK;
             okButton.Click += OkButton_Click;
             this.Controls.Add(okButton);
 
             cancelButton = new Button
             {
                 Text = "Cancel",
-                Location = new Point(335, 440),
-                Size = new Size(75, 30),
-                DialogResult = DialogResult.Cancel
+                Location = new Point(380, 340),
+                Size = new Size(75, 30)
             };
+            cancelButton.DialogResult = DialogResult.Cancel;
             this.Controls.Add(cancelButton);
 
-            // Event handlers for updating current hotkey display
-            ctrlCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
-            altCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
-            shiftCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
-            winCheckBox.CheckedChanged += UpdateCurrentHotkeyDisplay;
-            keyComboBox.SelectedIndexChanged += UpdateCurrentHotkeyDisplay;
+            // Startup Checkbox
+            startupCheckBox = new CheckBox
+            {
+                Text = "Run at Windows startup",
+                Location = new Point(20, 380),
+                Size = new Size(180, 23)
+            };
+            this.Controls.Add(startupCheckBox);
+
+            // Load initial state
+            LoadStartupState();
         }
 
         private void PopulateKeyComboBox()
@@ -340,93 +353,12 @@ namespace MiniTranslator
 
         private void PopulateLanguageComboBoxes()
         {
-            var commonLanguages = new Dictionary<string, string>
+            var languages = LanguageProvider.GetLanguages();
+            foreach (var lang in languages)
             {
-                {"en", "English"},
-                {"ru", "Русский"},
-                {"es", "Español"},
-                {"fr", "Français"},
-                {"de", "Deutsch"},
-                {"it", "Italiano"},
-                {"pt", "Português"},
-                {"zh", "中文"},
-                {"ja", "日本語"},
-                {"ko", "한국어"},
-                {"ar", "العربية"},
-                {"hi", "हिन्दी"},
-                {"tr", "Türkçe"},
-                {"pl", "Polski"},
-                {"nl", "Nederlands"},
-                {"sv", "Svenska"},
-                {"da", "Dansk"},
-                {"no", "Norsk"},
-                {"fi", "Suomi"},
-                {"cs", "Čeština"},
-                {"uk", "Українська"},
-                {"bg", "Български"},
-                {"hr", "Hrvatski"},
-                {"sk", "Slovenčina"},
-                {"sl", "Slovenščina"},
-                {"et", "Eesti"},
-                {"lv", "Latviešu"},
-                {"lt", "Lietuvių"},
-                {"hu", "Magyar"},
-                {"ro", "Română"},
-                {"el", "Ελληνικά"},
-                {"he", "עברית"},
-                {"th", "ไทย"},
-                {"vi", "Tiếng Việt"},
-                {"id", "Indonesia"},
-                {"ms", "Melayu"},
-                {"tl", "Filipino"},
-                {"fa", "فارسی"},
-                {"ur", "اردو"},
-                {"bn", "বাংলা"},
-                {"ta", "தமிழ்"},
-                {"te", "తెలుగు"},
-                {"mr", "मराठी"},
-                {"gu", "ગુજરાતી"},
-                {"kn", "ಕನ್ನಡ"},
-                {"ml", "മലയാളം"},
-                {"pa", "ਪੰਜਾਬੀ"},
-                {"or", "ଓଡିଆ"},
-                {"as", "অসমীয়া"},
-                {"ne", "नेपाली"},
-                {"si", "සිංහල"},
-                {"my", "မြန်မာ"},
-                {"km", "ខ្មែរ"},
-                {"lo", "ລາວ"},
-                {"ka", "ქართული"},
-                {"am", "አማርኛ"},
-                {"sw", "Kiswahili"},
-                {"zu", "isiZulu"},
-                {"af", "Afrikaans"},
-                {"is", "Íslenska"},
-                {"mt", "Malti"},
-                {"cy", "Cymraeg"},
-                {"ga", "Gaeilge"},
-                {"eu", "Euskera"},
-                {"ca", "Català"},
-                {"gl", "Galego"},
-                {"sq", "Shqip"},
-                {"mk", "Македонски"},
-                {"sr", "Српски"},
-                {"bs", "Bosanski"},
-                {"me", "Crnogorski"},
-                {"be", "Беларуская"},
-                {"kk", "Қазақ"},
-                {"ky", "Кыргыз"},
-                {"uz", "O'zbek"},
-                {"tg", "Тоҷикӣ"},
-                {"mn", "Монгол"},
-                {"az", "Azərbaycan"},
-                {"hy", "Հայերեն"}
-            };
-
-            foreach (var lang in commonLanguages)
-            {
-                sourceLanguageCombo.Items.Add(new LanguageItem { Code = lang.Key, Name = lang.Value });
-                targetLanguageCombo.Items.Add(new LanguageItem { Code = lang.Key, Name = lang.Value });
+                var item = new LanguageItem { Code = lang.Key, Name = lang.Value };
+                sourceLanguageCombo.Items.Add(item);
+                targetLanguageCombo.Items.Add(item);
             }
         }
 
@@ -439,8 +371,11 @@ namespace MiniTranslator
 
         private void LoadCurrentSettings()
         {
-            translateModeCheckBox.Checked = Settings.UseTranslateMode;
-            urlTextBox.Text = Settings.WebsiteUrl;
+            // Load translator selection
+            translatorComboBox.SelectedIndex = (int)Settings.PreferredTranslator;
+            
+            // Load browser selection
+            browserComboBox.SelectedIndex = (int)Settings.PreferredBrowser;
             
             widthSlider.Value = Math.Max(widthSlider.Minimum, Math.Min(widthSlider.Maximum, Settings.WindowWidth));
             heightSlider.Value = Math.Max(heightSlider.Minimum, Math.Min(heightSlider.Maximum, Settings.WindowHeight));
@@ -476,7 +411,6 @@ namespace MiniTranslator
             // Load browser setting
             browserComboBox.SelectedIndex = (int)Settings.PreferredBrowser;
             
-            UpdateControlVisibility();
             UpdateCurrentHotkeyDisplay(null, null);
         }
 
@@ -501,83 +435,50 @@ namespace MiniTranslator
             }
         }
 
-        private void TranslateModeCheckBox_CheckedChanged(object sender, EventArgs e)
-        {
-            UpdateControlVisibility();
-        }
-
-        private void UpdateControlVisibility()
-        {
-            bool isTranslateMode = translateModeCheckBox.Checked;
-            
-            // Show/hide URL controls
-            urlTextBox.Enabled = !isTranslateMode;
-            
-            // Update test button text
-            testButton.Text = isTranslateMode ? "Test Translation" : "Test Custom Website";
-        }
-
         private void TestButton_Click(object sender, EventArgs e)
         {
             try
             {
-                if (translateModeCheckBox.Checked)
+                // Test translation with clipboard text
+                string clipboardText = GetClipboardText();
+                if (string.IsNullOrEmpty(clipboardText))
                 {
-                    // Test translation mode
-                    string clipboardText = GetClipboardText();
-                    if (string.IsNullOrEmpty(clipboardText))
-                    {
-                        MessageBox.Show("No text found in clipboard to test translation. Copy some text and try again.", 
-                            "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
-                    }
+                    MessageBox.Show("No text found in clipboard to test translation. Copy some text and try again.", 
+                        "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
-                    var sourceItem = sourceLanguageCombo.SelectedItem as LanguageItem;
-                    var targetItem = targetLanguageCombo.SelectedItem as LanguageItem;
-                    
-                    if (sourceItem == null || targetItem == null)
-                    {
-                        MessageBox.Show("Please select both source and target languages.", 
-                            "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        return;
-                    }
+                var sourceItem = sourceLanguageCombo.SelectedItem as LanguageItem;
+                var targetItem = targetLanguageCombo.SelectedItem as LanguageItem;
+                
+                if (sourceItem == null || targetItem == null)
+                {
+                    MessageBox.Show("Please select both source and target languages.", 
+                        "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
 
-                    var url = $"https://translate.yandex.com/?source_lang={sourceItem.Code}&target_lang={targetItem.Code}&text={Uri.EscapeDataString(clipboardText)}";
-                    
-                    // Try to open in app mode
-                    if (!TryOpenInAppMode(url))
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) 
-                        { 
-                            UseShellExecute = true 
-                        });
-                    }
+                string url;
+                var selectedTranslator = (TranslatorType)translatorComboBox.SelectedIndex;
+                
+                if (selectedTranslator == TranslatorType.Google)
+                {
+                    // Google Translate URL format
+                    url = $"https://translate.google.com/?sl={sourceItem.Code}&tl={targetItem.Code}&text={Uri.EscapeDataString(clipboardText)}&op=translate";
                 }
                 else
                 {
-                    // Test custom website mode
-                    var url = urlTextBox.Text.Trim();
-                    if (string.IsNullOrWhiteSpace(url))
-                    {
-                        MessageBox.Show("Please enter a custom website URL to test.", "MiniTranslator", 
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
-                    }
-
-                    if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-                    {
-                        url = "https://" + url;
-                    }
-
-                    // Try to open in app mode (minimal UI) with Chrome or Edge
-                    if (!TryOpenInAppMode(url))
-                    {
-                        // Fallback to default browser if app mode fails
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) 
-                        { 
-                            UseShellExecute = true 
-                        });
-                    }
+                    // Yandex Translate URL format
+                    url = $"https://translate.yandex.com/?source_lang={sourceItem.Code}&target_lang={targetItem.Code}&text={Uri.EscapeDataString(clipboardText)}";
+                }
+                
+                // Try to open in app mode
+                if (!TryOpenInAppMode(url))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url) 
+                    { 
+                        UseShellExecute = true 
+                    });
                 }
             }
             catch (Exception ex)
@@ -602,8 +503,6 @@ namespace MiniTranslator
                 return string.Empty;
             }
         }
-
-
 
         private void WidthSlider_ValueChanged(object sender, EventArgs e)
         {
@@ -732,28 +631,49 @@ namespace MiniTranslator
             }
         }
 
-        private void OkButton_Click(object sender, EventArgs e)
+        private void LoadStartupState()
         {
-            // Validate based on mode
-            if (translateModeCheckBox.Checked)
+            if (StartupRegistryKey?.GetValue(AppName) != null)
             {
-                // Validate translation settings
-                if (sourceLanguageCombo.SelectedItem == null || targetLanguageCombo.SelectedItem == null)
-                {
-                    MessageBox.Show("Please select both source and target languages for translation mode.", 
-                        "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+                startupCheckBox.Checked = true;
             }
             else
             {
-                // Validate URL for custom website mode
-                if (string.IsNullOrWhiteSpace(urlTextBox.Text))
-                {
-                    MessageBox.Show("Please enter a custom website URL or enable translation mode.", "MiniTranslator", 
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
-                }
+                startupCheckBox.Checked = false;
+            }
+        }
+
+        private void SetStartup(bool enable)
+        {
+            if (StartupRegistryKey == null) return;
+
+            if (enable)
+            {
+                // Set the application to run at startup
+                StartupRegistryKey.SetValue(AppName, Application.ExecutablePath);
+            }
+            else
+            {
+                // Remove the application from startup
+                StartupRegistryKey.DeleteValue(AppName, false);
+            }
+        }
+
+        private void OkButton_Click(object sender, EventArgs e)
+        {
+            // Validate translation settings
+            if (sourceLanguageCombo.SelectedItem == null || targetLanguageCombo.SelectedItem == null)
+            {
+                MessageBox.Show("Please select both source and target languages.", 
+                    "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            if (translatorComboBox.SelectedIndex == -1)
+            {
+                MessageBox.Show("Please select a translation service.", 
+                    "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
             // Validate hotkey
@@ -772,18 +692,14 @@ namespace MiniTranslator
             }
 
             // Save settings
-            Settings.UseTranslateMode = translateModeCheckBox.Checked;
-            Settings.WebsiteUrl = urlTextBox.Text.Trim();
+            Settings.PreferredTranslator = (TranslatorType)translatorComboBox.SelectedIndex;
             Settings.WindowWidth = widthSlider.Value;
             Settings.WindowHeight = heightSlider.Value;
             
-            if (translateModeCheckBox.Checked)
-            {
-                var sourceItem = sourceLanguageCombo.SelectedItem as LanguageItem;
-                var targetItem = targetLanguageCombo.SelectedItem as LanguageItem;
-                Settings.SourceLanguage = sourceItem.Code;
-                Settings.TargetLanguage = targetItem.Code;
-            }
+            var sourceItem = sourceLanguageCombo.SelectedItem as LanguageItem;
+            var targetItem = targetLanguageCombo.SelectedItem as LanguageItem;
+            Settings.SourceLanguage = sourceItem.Code;
+            Settings.TargetLanguage = targetItem.Code;
             
             Settings.HotkeyModifiers = 0;
             if (ctrlCheckBox.Checked) Settings.HotkeyModifiers |= MOD_CONTROL;
@@ -795,6 +711,9 @@ namespace MiniTranslator
             
             // Save browser setting
             Settings.PreferredBrowser = (BrowserType)browserComboBox.SelectedIndex;
+
+            // Handle Startup setting
+            SetStartup(startupCheckBox.Checked);
         }
     }
 } 

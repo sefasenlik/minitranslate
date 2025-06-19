@@ -8,6 +8,25 @@ using System.Windows.Forms;
 
 namespace MiniTranslator
 {
+    public static class LanguageProvider
+    {
+        public static Dictionary<string, string> GetLanguages()
+        {
+            return new Dictionary<string, string>
+            {
+                {"en", "English"}, {"ru", "Русский"}, {"es", "Español"}, {"fr", "Français"},
+                {"de", "Deutsch"}, {"it", "Italiano"}, {"pt", "Português"}, {"zh", "中文"},
+                {"ja", "日本語"}, {"ko", "한국어"}, {"ar", "العربية"}, {"hi", "हिन्दी"},
+                {"tr", "Türkçe"}, {"pl", "Polski"}, {"nl", "Nederlands"}, {"sv", "Svenska"},
+                {"da", "Dansk"}, {"no", "Norsk"}, {"fi", "Suomi"}, {"cs", "Čeština"},
+                {"uk", "Українська"}, {"bg", "Български"}, {"hr", "Hrvatski"}, {"sk", "Slovenčina"},
+                {"sl", "Slovenščina"}, {"et", "Eesti"}, {"lv", "Latviešu"}, {"lt", "Lietuvių"},
+                {"hu", "Magyar"}, {"ro", "Română"}, {"el", "Ελληνικά"}, {"he", "עברית"},
+                {"th", "ไทย"}, {"vi", "Tiếng Việt"}, {"id", "Indonesia"}, {"ms", "Melayu"}
+            };
+        }
+    }
+
     public partial class MainForm : Form
     {
         private NotifyIcon trayIcon;
@@ -34,9 +53,10 @@ namespace MiniTranslator
         public MainForm()
         {
             InitializeComponent();
-            InitializeTrayIcon();
             LoadSettings();
+            InitializeTrayIcon();
             RegisterGlobalHotKey();
+            UpdateTrayIconText();
             
             // Hide the form initially
             WindowState = FormWindowState.Minimized;
@@ -55,50 +75,101 @@ namespace MiniTranslator
         private void InitializeTrayIcon()
         {
             trayMenu = new ContextMenuStrip();
-            trayMenu.Items.Add("Open/Translate", null, OnOpenWebsite);
-            trayMenu.Items.Add("-");
-            trayMenu.Items.Add("Settings", null, OnSettings);
-            trayMenu.Items.Add("-");
-            trayMenu.Items.Add("Exit", null, OnExit);
-
             trayIcon = new NotifyIcon()
             {
-                Text = "MiniTranslator - Quick Translator & Website Launcher",
+                Text = "MiniTranslator", // Set initial placeholder text
                 Icon = LoadCustomIcon(),
                 ContextMenuStrip = trayMenu,
                 Visible = true
             };
 
+            BuildTrayMenu();
             trayIcon.DoubleClick += OnOpenWebsite;
+        }
+
+        private void BuildTrayMenu()
+        {
+            trayMenu.Items.Clear();
+
+            trayMenu.Items.Add("Open/Translate", null, OnOpenWebsite);
+            trayMenu.Items.Add("-");
+
+            // Translator Service Menu
+            var translatorMenu = new ToolStripMenuItem("Translator");
+            var yandexItem = new ToolStripMenuItem("Yandex Translate", null, OnTranslatorChanged) { Tag = TranslatorType.Yandex };
+            var googleItem = new ToolStripMenuItem("Google Translate", null, OnTranslatorChanged) { Tag = TranslatorType.Google };
+            yandexItem.Checked = settings.PreferredTranslator == TranslatorType.Yandex;
+            googleItem.Checked = settings.PreferredTranslator == TranslatorType.Google;
+            translatorMenu.DropDownItems.Add(yandexItem);
+            translatorMenu.DropDownItems.Add(googleItem);
+            trayMenu.Items.Add(translatorMenu);
+
+            // Browser Menu
+            var browserMenu = new ToolStripMenuItem("Browser");
+            var chromeItem = new ToolStripMenuItem("Chrome", null, OnBrowserChanged) { Tag = BrowserType.Chrome };
+            var edgeItem = new ToolStripMenuItem("Edge", null, OnBrowserChanged) { Tag = BrowserType.Edge };
+            var defaultItem = new ToolStripMenuItem("Default", null, OnBrowserChanged) { Tag = BrowserType.Default };
+            chromeItem.Checked = settings.PreferredBrowser == BrowserType.Chrome;
+            edgeItem.Checked = settings.PreferredBrowser == BrowserType.Edge;
+            defaultItem.Checked = settings.PreferredBrowser == BrowserType.Default;
+            browserMenu.DropDownItems.Add(chromeItem);
+            browserMenu.DropDownItems.Add(edgeItem);
+            browserMenu.DropDownItems.Add(defaultItem);
+            trayMenu.Items.Add(browserMenu);
+            
+            // Language Menus
+            var sourceLangMenu = new ToolStripMenuItem("Source Language");
+            var targetLangMenu = new ToolStripMenuItem("Target Language");
+
+            var languages = LanguageProvider.GetLanguages();
+            foreach (var lang in languages)
+            {
+                // Add to Source Language Menu
+                var sourceItem = new ToolStripMenuItem(lang.Value, null, OnSourceLanguageChanged) { Tag = lang.Key };
+                sourceItem.Checked = settings.SourceLanguage == lang.Key;
+                sourceLangMenu.DropDownItems.Add(sourceItem);
+
+                // Add to Target Language Menu
+                var targetItem = new ToolStripMenuItem(lang.Value, null, OnTargetLanguageChanged) { Tag = lang.Key };
+                targetItem.Checked = settings.TargetLanguage == lang.Key;
+                targetLangMenu.DropDownItems.Add(targetItem);
+            }
+
+            trayMenu.Items.Add(sourceLangMenu);
+            trayMenu.Items.Add(targetLangMenu);
+
+            trayMenu.Items.Add("-");
+            trayMenu.Items.Add("Settings", null, OnSettings);
+            trayMenu.Items.Add("Exit", null, OnExit);
         }
 
         private Icon LoadCustomIcon()
         {
-            // Try to load icon from specific path first
-            try
+            // Try to load icon from multiple possible locations
+            string[] iconPaths = {
+                "icon.ico",  // Current directory first
+                Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "icon.ico"),  // Application directory
+                Path.Combine(Environment.CurrentDirectory, "icon.ico"),  // Working directory
+                Path.Combine(Path.GetDirectoryName(Application.ExecutablePath) ?? "", "icon.ico")  // Executable directory
+            };
+
+            foreach (string iconPath in iconPaths)
             {
-                string iconPath = @"C:\Users\USER\Documents\GitHub\minibrowser\icon.ico";
-                if (File.Exists(iconPath))
-                {
-                    return new Icon(iconPath);
-                }
-            }
-            catch
-            {
-                // Fall back to relative path
                 try
                 {
-                    if (File.Exists("icon.ico"))
+                    if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
                     {
-                        return new Icon("icon.ico");
+                        return new Icon(iconPath);
                     }
                 }
                 catch
                 {
-                    // Fall back to default if both fail
+                    // Continue to next path if this one fails
+                    continue;
                 }
             }
             
+            // If no icon file found, create default
             return CreateDefaultIcon();
         }
 
@@ -118,20 +189,16 @@ namespace MiniTranslator
         private void LoadSettings()
         {
             settings = AppSettings.Load();
-            UpdateTrayIconText();
+            // DO NOT update tray icon text here, as the icon may not exist yet.
         }
 
         private void UpdateTrayIconText()
         {
+            if (trayIcon == null) return; // Add a safeguard
+
             var hotkeyText = GetHotkeyDisplayString();
-            if (settings.UseTranslateMode)
-            {
-                trayIcon.Text = $"MiniTranslator - {hotkeyText} to translate clipboard ({settings.SourceLanguage}→{settings.TargetLanguage})";
-            }
-            else
-            {
-                trayIcon.Text = $"MiniTranslator - {hotkeyText} to open custom website: {settings.WebsiteUrl}";
-            }
+            var translatorName = settings.PreferredTranslator == TranslatorType.Google ? "Google" : "Yandex";
+            trayIcon.Text = $"MiniTranslator - {hotkeyText} to translate clipboard ({settings.SourceLanguage}→{settings.TargetLanguage}) via {translatorName}";
         }
 
         private string GetHotkeyDisplayString()
@@ -180,37 +247,25 @@ namespace MiniTranslator
         {
             try
             {
-                string url;
-                
-                if (settings.UseTranslateMode)
+                // Get text from clipboard for translation
+                string clipboardText = GetClipboardText();
+                if (string.IsNullOrEmpty(clipboardText))
                 {
-                    // Get text from clipboard for translation
-                    string clipboardText = GetClipboardText();
-                    if (string.IsNullOrEmpty(clipboardText))
-                    {
-                        MessageBox.Show("No text found in clipboard to translate.", 
-                            "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
-                    }
+                    MessageBox.Show("No text found in clipboard to translate.", 
+                        "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
-                    // Construct Yandex Translate URL with clipboard text
-                    url = $"https://translate.yandex.com/?source_lang={settings.SourceLanguage}&target_lang={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}";
+                string url;
+                if (settings.PreferredTranslator == TranslatorType.Google)
+                {
+                    // Google Translate URL format
+                    url = $"https://translate.google.com/?sl={settings.SourceLanguage}&tl={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}&op=translate";
                 }
                 else
                 {
-                    // Custom website mode
-                    if (string.IsNullOrWhiteSpace(settings.WebsiteUrl))
-                    {
-                        MessageBox.Show("No custom website URL configured. Please check settings.",
-                            "MiniTranslator", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        return;
-                    }
-
-                    url = settings.WebsiteUrl;
-                    if (!url.StartsWith("http://") && !url.StartsWith("https://"))
-                    {
-                        url = "https://" + url;
-                    }
+                    // Yandex Translate URL format
+                    url = $"https://translate.yandex.com/?source_lang={settings.SourceLanguage}&target_lang={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}";
                 }
 
                 // Try to open in app mode (minimal UI) with Chrome or Edge
@@ -245,28 +300,35 @@ namespace MiniTranslator
 
         private bool TryOpenInAppMode(string url)
         {
+            // Generate a temporary user data directory for a clean session
+            string tempUserDataDir = Path.Combine(Path.GetTempPath(), "MiniTranslator_" + Guid.NewGuid().ToString("N"));
+
             switch (settings.PreferredBrowser)
             {
                 case BrowserType.Chrome:
-                    return TryOpenWithChrome(url);
+                    return TryOpenWithChrome(url, tempUserDataDir);
                     
                 case BrowserType.Edge:
-                    return TryOpenWithEdge(url);
+                    return TryOpenWithEdge(url, tempUserDataDir);
                     
                 case BrowserType.Default:
-                    // Use default browser (system default)
-                    return false; // Will trigger fallback to default browser
+                    // Default browser doesn't support app mode or custom user directories
+                    return false; 
                     
                 default:
                     // Fallback to old behavior (try Chrome first, then Edge)
-                    return TryOpenWithChrome(url) || TryOpenWithEdge(url);
+                    return TryOpenWithChrome(url, tempUserDataDir) || TryOpenWithEdge(url, tempUserDataDir);
             }
         }
 
-        private bool TryOpenWithChrome(string url)
+        private bool TryOpenWithChrome(string url, string userDataDir)
         {
+            var sizeArgs = $"--window-size={settings.WindowWidth},{settings.WindowHeight}";
+            var userDataArgs = $"--user-data-dir=\"{userDataDir}\"";
+            var arguments = $"--app={url} {sizeArgs} {userDataArgs} --disable-extensions";
+
             // Try Chrome with generic name first
-            if (TryOpenWithBrowser(url, "chrome.exe", "--app="))
+            if (TryStartProcess("chrome.exe", arguments))
                 return true;
 
             // Try Chrome in common installation paths
@@ -278,19 +340,23 @@ namespace MiniTranslator
 
             foreach (var chromePath in chromePaths)
             {
-                if (File.Exists(chromePath))
+                if (File.Exists(chromePath) && TryStartProcess(chromePath, arguments))
                 {
-                    return TryStartProcess(chromePath, $"--app={url} --new-window");
+                    return true;
                 }
             }
 
             return false;
         }
 
-        private bool TryOpenWithEdge(string url)
+        private bool TryOpenWithEdge(string url, string userDataDir)
         {
+            var sizeArgs = $"--window-size={settings.WindowWidth},{settings.WindowHeight}";
+            var userDataArgs = $"--user-data-dir=\"{userDataDir}\"";
+            var arguments = $"--app={url} {sizeArgs} {userDataArgs} --disable-extensions";
+            
             // Try Edge with generic name first
-            if (TryOpenWithBrowser(url, "msedge.exe", "--app="))
+            if (TryStartProcess("msedge.exe", arguments))
                 return true;
 
             // Try Edge in common installation paths
@@ -301,52 +367,23 @@ namespace MiniTranslator
 
             foreach (var edgePath in edgePaths)
             {
-                if (File.Exists(edgePath))
+                if (File.Exists(edgePath) && TryStartProcess(edgePath, arguments))
                 {
-                    return TryStartProcess(edgePath, $"--app={url} --new-window");
+                    return true;
                 }
             }
 
             return false;
         }
 
-        private bool TryOpenWithBrowser(string url, string browserExecutable, string appFlag)
-        {
-            try
-            {
-                // Add window size parameters
-                var sizeArgs = $"--window-size={settings.WindowWidth},{settings.WindowHeight}";
-                var arguments = $"{appFlag}{url} --new-window {sizeArgs}";
-
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = browserExecutable,
-                    Arguments = arguments,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                Process.Start(processStartInfo);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
         private bool TryStartProcess(string fileName, string arguments)
         {
             try
             {
-                // Add window size parameters
-                var sizeArgs = $"--window-size={settings.WindowWidth},{settings.WindowHeight}";
-                var fullArguments = $"{arguments} {sizeArgs}";
-
                 var processStartInfo = new ProcessStartInfo
                 {
                     FileName = fileName,
-                    Arguments = fullArguments,
+                    Arguments = arguments,
                     UseShellExecute = false,
                     CreateNoWindow = true
                 };
@@ -373,6 +410,53 @@ namespace MiniTranslator
             }
         }
 
+        private void OnTranslatorChanged(object sender, EventArgs e)
+        {
+            var selectedItem = sender as ToolStripMenuItem;
+            if (selectedItem?.Tag is TranslatorType selectedTranslator)
+            {
+                settings.PreferredTranslator = selectedTranslator;
+                settings.Save();
+                UpdateTrayIconText();
+                BuildTrayMenu(); // Rebuild menu to update checkmarks
+            }
+        }
+
+        private void OnBrowserChanged(object sender, EventArgs e)
+        {
+            var selectedItem = sender as ToolStripMenuItem;
+            if (selectedItem?.Tag is BrowserType selectedBrowser)
+            {
+                settings.PreferredBrowser = selectedBrowser;
+                settings.Save();
+                BuildTrayMenu(); // Rebuild menu to update checkmarks
+            }
+        }
+
+        private void OnSourceLanguageChanged(object sender, EventArgs e)
+        {
+            var selectedItem = sender as ToolStripMenuItem;
+            if (selectedItem?.Tag is string langCode)
+            {
+                settings.SourceLanguage = langCode;
+                settings.Save();
+                UpdateTrayIconText();
+                BuildTrayMenu();
+            }
+        }
+
+        private void OnTargetLanguageChanged(object sender, EventArgs e)
+        {
+            var selectedItem = sender as ToolStripMenuItem;
+            if (selectedItem?.Tag is string langCode)
+            {
+                settings.TargetLanguage = langCode;
+                settings.Save();
+                UpdateTrayIconText();
+                BuildTrayMenu();
+            }
+        }
+
         private void OnSettings(object sender, EventArgs e)
         {
             using (var settingsForm = new SettingsForm(settings))
@@ -384,6 +468,7 @@ namespace MiniTranslator
                     RegisterGlobalHotKey();
                     UpdateTrayIconText();
                     UpdateTrayIcon();
+                    BuildTrayMenu(); // Rebuild menu to reflect changes
                 }
             }
         }
