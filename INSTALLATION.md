@@ -3,14 +3,22 @@
 
 ## Quick Start
 
-### Option 1: Use the Standalone Executable (Recommended)
-1. Navigate to `bin/Release/net6.0-windows/win-x64/publish/`
-2. Double-click `MiniBrowser.exe` to start the application
-3. The application will start minimized in the system tray (look for a blue "B" icon)
-4. Press **Ctrl+Q** to open Google (default website)
+### Option 1: Download Pre-built Executable (Recommended)
+1. Go to the [Releases](../../releases) section on GitHub
+2. Download the latest `MiniTranslator.exe` from the release assets
+3. Double-click `MiniTranslator.exe` to start the application
+4. The application will start minimized in the system tray (look for a teal/white icon)
+5. Press **Ctrl+Q** to activate translation mode (default)
 
-### Option 2: Use the Batch File
-1. Double-click `run-minibrowser.bat` in the project root
+### Option 2: Build from Source
+1. Clone this repository
+2. Open the project in Visual Studio or use .NET CLI
+3. Build the project: `dotnet publish -c Release -r win-x64 --self-contained`
+4. Navigate to `bin/Release/net6.0-windows/win-x64/publish/`
+5. Run `MiniTranslator.exe`
+
+### Option 3: Use the Batch File
+1. Double-click `run-minitranslator.bat` in the project root (if available)
 2. This will start the application and show helpful instructions
 
 ## First Time Setup
@@ -48,10 +56,10 @@
 - **Exit**: Right-click tray icon → "Exit"
 
 ### Auto-Start with Windows (Optional)
-To have MiniBrowser start automatically when Windows boots:
+To have MiniTranslator start automatically when Windows boots:
 
 1. Press `Win+R`, type `shell:startup`, and press Enter
-2. Copy `MiniBrowser.exe` to the Startup folder
+2. Copy `MiniTranslator.exe` from the `publish/` folder to the Startup folder
 3. The application will now start with Windows
 
 ## Features
@@ -165,7 +173,7 @@ Example configurations:
 ## Uninstalling
 
 1. Right-click the tray icon and select "Exit"
-2. Delete the MiniBrowser folder
+2. Delete the MiniTranslator folder
 3. Optionally delete settings: `%APPDATA%\MiniBrowser\`
 
 ---
