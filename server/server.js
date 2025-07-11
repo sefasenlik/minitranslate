@@ -34,7 +34,7 @@ const languages = {
     'ar': 'العربية', 'hi': 'हिन्दी', 'tr': 'Türkçe', 'pl': 'Polski', 'nl': 'Nederlands', 
     'sv': 'Svenska', 'da': 'Dansk', 'no': 'Norsk', 'fi': 'Suomi', 'cs': 'Čeština', 
     'uk': 'Українська', 'bg': 'Български', 'hr': 'Hrvatski', 'sk': 'Slovenčina', 
-    'sl': 'Slovenščina', 'et': 'Eesti', 'lv': 'Latviešu', 'lt': 'Lietuvių', 'hu': 'Magyar', 
+    'sl': 'Slovenščina', 'et': 'Eesti', 'sr': 'Српски', 'lt': 'Lietuvių', 'hu': 'Magyar', 
     'ro': 'Română', 'el': 'Ελληνικά', 'he': 'עברית', 'th': 'ไทย', 'vi': 'Tiếng Việt', 
     'id': 'Indonesia', 'ms': 'Melayu'
 };
@@ -148,18 +148,14 @@ app.post('/translate', async (req, res) => {
         // Create prompt with context if provided
         let prompt;
         if (sourceLang === 'auto') {
-            prompt = `Detect the language of the following text and translate it to ${targetLanguageName}. 
-Provide only the translation without any additional explanations, formatting, or quotation marks.`;
+            prompt = `Detect the language and translate to ${targetLanguageName}:\n${text}`;
         } else {
-            prompt = `Translate the following text from ${sourceLanguageName} to ${targetLanguageName}. 
-Provide only the translation without any additional explanations, formatting, or quotation marks.`;
+            prompt = `Translate from ${sourceLanguageName} to ${targetLanguageName}:\n${text}`;
         }
-        
-        if (context && context.trim()) {
-            prompt += `\n\nNote: ${context.trim()}`;
+        if (context) {
+            prompt += `\nRequirements: ${context}`;
         }
-        
-        prompt += `\n\nText to translate:\n${text}`;
+        prompt += `\nOnly output the translation.`;
 
         // Call ChatGPT API
         const response = await fetch('https://api.openai.com/v1/chat/completions', {

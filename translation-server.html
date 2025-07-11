@@ -368,7 +368,7 @@
         </div>
         
         <div class="controls">
-            <input type="text" id="contextField" class="context-field context-field-mobile" placeholder="Context/requirements (e.g., male speaker, preferred terms)" maxlength="250">
+            <input type="text" id="contextField" class="context-field context-field-mobile" placeholder="Context/requirements (e.g., female speaker, formal tone, specific terms)" maxlength="250">
             <div class="controls-row">
                 <select id="sourceLang" class="language-select">
                     <option value="auto">Detect language</option>
@@ -398,7 +398,7 @@
                     <option value="sk">Slovenčina</option>
                     <option value="sl">Slovenščina</option>
                     <option value="et">Eesti</option>
-                    <option value="lv">Latviešu</option>
+                    <option value="sr">Српски</option>
                     <option value="lt">Lietuvių</option>
                     <option value="hu">Magyar</option>
                     <option value="ro">Română</option>
@@ -437,7 +437,7 @@
                     <option value="sk">Slovenčina</option>
                     <option value="sl">Slovenščina</option>
                     <option value="et">Eesti</option>
-                    <option value="lv">Latviešu</option>
+                    <option value="sr">Српски</option>
                     <option value="lt">Lietuvių</option>
                     <option value="hu">Magyar</option>
                     <option value="ro">Română</option>
@@ -448,7 +448,7 @@
                     <option value="id">Indonesia</option>
                     <option value="ms">Melayu</option>
                 </select>
-                <input type="text" id="contextFieldDesktop" class="context-field context-field-desktop" placeholder="Context/requirements (e.g., male speaker, preferred terms)" maxlength="250">
+                <input type="text" id="contextFieldDesktop" class="context-field context-field-desktop" placeholder="Context/requirements (e.g., female speaker, formal tone, specific terms)" maxlength="250">
                 <button class="translate-btn" id="translateBtn">
                     <span class="btn-text">Translate</span>
                     <div class="loading" id="loading">
@@ -468,7 +468,7 @@
             'ar': 'العربية', 'hi': 'हिन्दी', 'tr': 'Türkçe', 'pl': 'Polski', 'nl': 'Nederlands', 
             'sv': 'Svenska', 'da': 'Dansk', 'no': 'Norsk', 'fi': 'Suomi', 'cs': 'Čeština', 
             'uk': 'Українська', 'bg': 'Български', 'hr': 'Hrvatski', 'sk': 'Slovenčina', 
-            'sl': 'Slovenščina', 'et': 'Eesti', 'lv': 'Latviešu', 'lt': 'Lietuvių', 'hu': 'Magyar', 
+            'sl': 'Slovenščina', 'et': 'Eesti', 'sr': 'Српски', 'lt': 'Lietuvių', 'hu': 'Magyar', 
             'ro': 'Română', 'el': 'Ελληνικά', 'he': 'עברית', 'th': 'ไทย', 'vi': 'Tiếng Việt', 
             'id': 'Indonesia', 'ms': 'Melayu'
         };
@@ -556,8 +556,8 @@
 
             static getSuggestedSourceLanguage(detectedScript, currentSourceLang, currentTargetLang) {
                 const scriptToLanguageMap = {
-                    'cyrillic': ['ru', 'uk', 'bg', 'sr', 'mk'],
-                    'latin': ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'nl', 'sv', 'da', 'no', 'fi', 'cs', 'sk', 'sl', 'et', 'lv', 'lt', 'hu', 'ro', 'hr'],
+                    'cyrillic': ['ru', 'uk', 'bg', 'sr'],
+                    'latin': ['en', 'es', 'fr', 'de', 'it', 'pt', 'pl', 'nl', 'sv', 'da', 'no', 'fi', 'cs', 'sk', 'sl', 'et', 'sr', 'lt', 'hu', 'ro', 'hr', 'tr', 'vi', 'id', 'ms'],
                     'arabic': ['ar'],
                     'chinese': ['zh'],
                     'japanese': ['ja'],
@@ -615,23 +615,6 @@
 
         // Clean up server URL - remove trailing slash
         serverUrl = serverUrl.replace(/\/$/, '');
-
-        console.log('🔧 Initialization:', {
-            sourceLang,
-            targetLang,
-            text: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
-            context: context || 'none',
-            serverUrl,
-            hasToken: !!token,
-            tokenLength: token.length,
-            tokenPreview: token ? `${token.substring(0, 3)}...${token.substring(token.length - 3)}` : 'none'
-        });
-        
-        // Debug: Show all URL parameters
-        console.log('🔍 All URL parameters:');
-        for (const [key, value] of urlParams.entries()) {
-            console.log(`  ${key}: ${value}`);
-        }
 
         // Initialize the interface
         document.getElementById('sourceLang').value = sourceLang;
@@ -730,10 +713,33 @@
             const sourceText = document.getElementById('sourceText').value;
             const targetText = document.getElementById('targetText').value;
 
-            document.getElementById('sourceLang').value = targetLang;
-            document.getElementById('targetLang').value = sourceLang;
+            // Always swap the text fields
             document.getElementById('sourceText').value = targetText;
             document.getElementById('targetText').value = sourceText;
+
+            // Special handling for "Detect language" (auto)
+            if (sourceLang === 'auto') {
+                // When source is "auto", we can't swap directly
+                // Instead, we'll detect the language from the source text and set target to that
+                if (sourceText.trim().length > 0) {
+                    const detectedScript = LanguageDetector.detectPrimaryScript(sourceText);
+                    const detectedLanguage = LanguageDetector.getSuggestedSourceLanguage(detectedScript, 'auto', targetLang);
+                    
+                    if (detectedLanguage !== 'auto') {
+                        // Set target to detected language, keep source as "auto"
+                        document.getElementById('targetLang').value = detectedLanguage;
+                        showSuccess(`Auto-set target language to: ${languages[detectedLanguage]}`);
+                    } else {
+                        showError('Could not detect language from text. Please select a specific source language.');
+                    }
+                } else {
+                    showError('Please enter some text to detect the language.');
+                }
+            } else {
+                // Normal swap behavior for languages
+                document.getElementById('sourceLang').value = targetLang;
+                document.getElementById('targetLang').value = sourceLang;
+            }
 
             updateCharCount();
         }
@@ -742,7 +748,15 @@
             const sourceText = document.getElementById('sourceText').value.trim();
             let sourceLang = document.getElementById('sourceLang').value;
             let targetLang = document.getElementById('targetLang').value;
-            const context = document.getElementById('contextField').value.trim();
+            // Prefer desktop context field if it exists and is non-empty, otherwise use mobile
+            let context = '';
+            const contextDesktopElem = document.getElementById('contextFieldDesktop');
+            const contextMobileElem = document.getElementById('contextField');
+            if (contextDesktopElem && contextDesktopElem.value.trim()) {
+                context = contextDesktopElem.value.trim();
+            } else if (contextMobileElem) {
+                context = contextMobileElem.value.trim();
+            }
 
             if (!sourceText) {
                 showError('Please enter text to translate.');
@@ -763,7 +777,6 @@
             if (sourceLang !== 'auto' && sourceText.length > 10) {
                 const detectedScript = LanguageDetector.detectPrimaryScript(sourceText);
                 const suggestedSource = LanguageDetector.getSuggestedSourceLanguage(detectedScript, sourceLang, targetLang);
-                console.log('Auto-detect:', { sourceLang, targetLang, detectedScript, suggestedSource });
                 if (suggestedSource === sourceLang) {
                     // Do nothing, keep as is
                 } else if (suggestedSource === targetLang) {
@@ -803,18 +816,6 @@
                     token: token
                 };
                 
-                console.log('🌐 Calling server URL:', fullUrl);
-                console.log('📤 Request data:', {
-                    text: sourceText,
-                    sourceLang: sourceLang,
-                    targetLang: targetLang,
-                    context: context || 'none',
-                    token: token ? '***' : 'missing'
-                });
-                console.log('🔑 Token length:', token.length);
-                console.log('🔑 Token first 3 chars:', token.substring(0, 3));
-                console.log('🔑 Token last 3 chars:', token.substring(token.length - 3));
-
                 const response = await fetch(fullUrl, {
                     method: 'POST',
                     headers: {
@@ -823,11 +824,7 @@
                     body: JSON.stringify(requestBody)
                 });
 
-                console.log('📡 Response status:', response.status);
-                console.log('📡 Response headers:', response.headers);
-
                 const data = await response.json();
-                console.log('📥 Response data:', data);
 
                 if (!response.ok) {
                     throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
@@ -842,14 +839,6 @@
                 }
 
             } catch (error) {
-                console.error('❌ Translation error:', error);
-                console.error('❌ Error details:', {
-                    message: error.message,
-                    stack: error.stack,
-                    serverUrl: serverUrl,
-                    tokenLength: token ? token.length : 0,
-                    tokenPreview: token ? `${token.substring(0, 3)}...${token.substring(token.length - 3)}` : 'none'
-                });
                 showError(`Translation failed: ${error.message}`);
             } finally {
                 translateBtn.disabled = false;

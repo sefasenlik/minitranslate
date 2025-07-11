@@ -86,8 +86,8 @@ namespace MiniTranslate
         {
             var scriptToLanguageMap = new Dictionary<string, string[]>
             {
-                {"cyrillic", new[] {"ru", "uk", "bg", "sr", "mk"}},
-                {"latin", new[] {"en", "es", "fr", "de", "it", "pt", "pl", "nl", "sv", "da", "no", "fi", "cs", "sk", "sl", "et", "lv", "lt", "hu", "ro", "hr"}},
+                {"cyrillic", new[] {"ru", "uk", "bg", "sr"}},
+                {"latin", new[] {"en", "es", "fr", "de", "it", "pt", "pl", "nl", "sv", "da", "no", "fi", "cs", "sk", "sl", "et", "sr", "lt", "hu", "ro", "hr", "tr", "vi", "id", "ms"}},
                 {"arabic", new[] {"ar"}},
                 {"chinese", new[] {"zh"}},
                 {"japanese", new[] {"ja"}},
@@ -148,7 +148,7 @@ namespace MiniTranslate
                 {"tr", "Türkçe"}, {"pl", "Polski"}, {"nl", "Nederlands"}, {"sv", "Svenska"},
                 {"da", "Dansk"}, {"no", "Norsk"}, {"fi", "Suomi"}, {"cs", "Čeština"},
                 {"uk", "Українська"}, {"bg", "Български"}, {"hr", "Hrvatski"}, {"sk", "Slovenčina"},
-                {"sl", "Slovenščina"}, {"et", "Eesti"}, {"lv", "Latviešu"}, {"lt", "Lietuvių"},
+                {"sl", "Slovenščina"}, {"et", "Eesti"}, {"sr", "Српски"}, {"lt", "Lietuvių"},
                 {"hu", "Magyar"}, {"ro", "Română"}, {"el", "Ελληνικά"}, {"he", "עברית"},
                 {"th", "ไทย"}, {"vi", "Tiếng Việt"}, {"id", "Indonesia"}, {"ms", "Melayu"}
             };
@@ -163,6 +163,10 @@ namespace MiniTranslate
         private int hotKeyId = 1;
         private static readonly HttpClient httpClient = new HttpClient();
         private Process nodeServerProcess;
+        
+        // Double key detection
+        private DateTime lastKeyPress = DateTime.MinValue;
+        private const int DOUBLE_KEY_TIMEOUT_MS = 300; // 300ms timeout for double key detection
 
         // Windows API for global hotkeys
         [DllImport("user32.dll")]
@@ -189,12 +193,28 @@ namespace MiniTranslate
         private Process chatGptWindowProcess = null;
         private Process translationServerWindowProcess = null;
 
+        // Clipboard monitoring for double copy detection
+        private const int WM_CLIPBOARDUPDATE = 0x031D;
+        [DllImport("user32.dll")]
+        private static extern bool AddClipboardFormatListener(IntPtr hwnd);
+        [DllImport("user32.dll")]
+        private static extern bool RemoveClipboardFormatListener(IntPtr hwnd);
+        private DateTime lastClipboardCopy = DateTime.MinValue;
+        private bool clipboardListenerActive = false;
+
         public MainForm()
         {
             InitializeComponent();
             LoadSettings();
             InitializeTrayIcon();
-            RegisterGlobalHotKey();
+            if (settings.HotkeyType == HotkeyType.SingleKey)
+            {
+                RegisterGlobalHotKey();
+            }
+            else
+            {
+                StartClipboardListener();
+            }
             UpdateTrayIconText();
             StartNodeServer();
             
@@ -235,7 +255,9 @@ namespace MiniTranslate
             trayMenu.Items.Add("-");
 
             // Switch Languages
-            trayMenu.Items.Add("Switch Languages", null, OnSwitchLanguages);
+            var switchLanguagesItem = new ToolStripMenuItem("Switch Languages", null, OnSwitchLanguages);
+            switchLanguagesItem.Enabled = settings.SourceLanguage != "auto";
+            trayMenu.Items.Add(switchLanguagesItem);
             trayMenu.Items.Add("-");
 
             // Translator Service Menu
@@ -380,28 +402,58 @@ namespace MiniTranslate
             
             parts.Add(((Keys)settings.HotkeyKey).ToString());
             
-            return string.Join("+", parts);
+            var hotkeyString = string.Join("+", parts);
+            
+            if (settings.HotkeyType == HotkeyType.DoubleKey)
+            {
+                hotkeyString += "+" + ((Keys)settings.HotkeyKey).ToString();
+            }
+            
+            return hotkeyString;
         }
 
         private void RegisterGlobalHotKey()
         {
             UnregisterHotKey(this.Handle, hotKeyId);
-            
-            if (!RegisterHotKey(this.Handle, hotKeyId, settings.HotkeyModifiers, settings.HotkeyKey))
+            if (settings.HotkeyType == HotkeyType.SingleKey)
             {
-                MessageBox.Show($"Failed to register hotkey {GetHotkeyDisplayString()}. It might be already in use.",
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                if (!RegisterHotKey(this.Handle, hotKeyId, settings.HotkeyModifiers, settings.HotkeyKey))
+                {
+                    MessageBox.Show($"Failed to register hotkey {GetHotkeyDisplayString()}. It might be already in use.",
+                        "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
             }
-            
-            // Update tray icon if settings changed
+            // No registration for double-key mode
             UpdateTrayIcon();
         }
 
         protected override void WndProc(ref Message m)
         {
-            if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == hotKeyId)
+            if (settings.HotkeyType == HotkeyType.DoubleKey && m.Msg == WM_CLIPBOARDUPDATE)
             {
-                OpenWebsite();
+                // Clipboard updated (copy event)
+                var now = DateTime.Now;
+                var timeSinceLastCopy = (now - lastClipboardCopy).TotalMilliseconds;
+                if (timeSinceLastCopy <= DOUBLE_KEY_TIMEOUT_MS)
+                {
+                    lastClipboardCopy = DateTime.MinValue; // Reset
+                    OpenWebsite(); // Trigger translation
+                }
+                else
+                {
+                    lastClipboardCopy = now;
+                }
+            }
+            else if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == hotKeyId)
+            {
+                if (settings.HotkeyType == HotkeyType.DoubleKey)
+                {
+                    // Should never be called, but keep for safety
+                }
+                else
+                {
+                    OpenWebsite();
+                }
             }
             base.WndProc(ref m);
         }
@@ -424,8 +476,8 @@ namespace MiniTranslate
                     return;
                 }
 
-                // Auto-switch languages if enabled
-                if (settings.AutoSwitchLanguages)
+                // Auto-switch languages if enabled (but skip when source language is "auto" - Detect language)
+                if (settings.AutoSwitchLanguages && settings.SourceLanguage != "auto")
                 {
                     var (newSource, newTarget) = LanguageDetector.GetAutoSwitchedLanguages(
                         clipboardText, settings.SourceLanguage, settings.TargetLanguage);
@@ -701,7 +753,16 @@ namespace MiniTranslate
                 {
                     settings = settingsForm.Settings;
                     settings.Save();
-                    RegisterGlobalHotKey();
+                    UnregisterHotKey(this.Handle, hotKeyId);
+                    StopClipboardListener();
+                    if (settings.HotkeyType == HotkeyType.SingleKey)
+                    {
+                        RegisterGlobalHotKey();
+                    }
+                    else
+                    {
+                        StartClipboardListener();
+                    }
                     UpdateTrayIconText();
                     UpdateTrayIcon();
                     BuildTrayMenu(); // Rebuild menu to reflect changes
@@ -713,6 +774,7 @@ namespace MiniTranslate
         {
             KillNodeServer();
             UnregisterHotKey(this.Handle, hotKeyId);
+            StopClipboardListener();
             trayIcon.Visible = false;
             Application.Exit();
         }
@@ -723,6 +785,7 @@ namespace MiniTranslate
             {
                 KillNodeServer();
                 UnregisterHotKey(this.Handle, hotKeyId);
+                StopClipboardListener();
                 trayIcon?.Dispose();
                 trayMenu?.Dispose();
             }
@@ -886,6 +949,23 @@ namespace MiniTranslate
             catch
             {
                 return false;
+            }
+        }
+
+        private void StartClipboardListener()
+        {
+            if (!clipboardListenerActive)
+            {
+                AddClipboardFormatListener(this.Handle);
+                clipboardListenerActive = true;
+            }
+        }
+        private void StopClipboardListener()
+        {
+            if (clipboardListenerActive)
+            {
+                RemoveClipboardFormatListener(this.Handle);
+                clipboardListenerActive = false;
             }
         }
     }

@@ -20,18 +20,24 @@ namespace MiniTranslate
         TranslationServer
     }
 
+    public enum HotkeyType
+    {
+        SingleKey,
+        DoubleKey
+    }
+
     public class AppSettings
     {
         public int HotkeyModifiers { get; set; } = 0x0002; // MOD_CONTROL
         public int HotkeyKey { get; set; } = (int)Keys.Q;
-        public string SourceLanguage { get; set; } = "auto";
+        public HotkeyType HotkeyType { get; set; } = HotkeyType.SingleKey;
+        public string SourceLanguage { get; set; } = "en";
         public string TargetLanguage { get; set; } = "ru";
         public TranslatorType PreferredTranslator { get; set; } = TranslatorType.TranslationServer;
         public int WindowWidth { get; set; } = 850;
         public int WindowHeight { get; set; } = 600;
         public BrowserType PreferredBrowser { get; set; } = BrowserType.Chrome;
         public string ChatGptApiKey { get; set; } = string.Empty;
-        public string ChatGptApiServerUrl { get; set; } = "http://localhost:3000";
         public string TranslationServerUrl { get; set; } = "https://api.sefa.name.tr";
         public bool AutoSwitchLanguages { get; set; } = true;
         public string TranslationServerToken { get; set; } = string.Empty;
