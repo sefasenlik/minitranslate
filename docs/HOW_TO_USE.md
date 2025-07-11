@@ -20,7 +20,7 @@ A lightweight utility for instant, hotkey-based text translation with multiple t
 
 1. **Start the App**: Double-click `MiniTranslate.exe` - a black and yellow icon will appear in your system tray (bottom-right corner)
 2. **Copy Text**: Highlight text in any application (browser, PDF, code editor, etc.) and press `Ctrl+C`
-3. **Press Hotkey**: Press the global hotkey (default is `Ctrl+Q`)
+3. **Press Hotkey**: Press the global hotkey (default is `Ctrl+Q`, or use `Ctrl+C+C` like DeepL)
 4. **Get Translation**: A translation window will appear with your translated text
 
 ## Translation Services
@@ -120,7 +120,7 @@ Right-click the tray icon for fast access to common settings:
 Right-click the tray icon and select "Settings" for full configuration:
 
 #### General Settings
-- **Global Hotkey**: Configure the keyboard shortcut (default: Ctrl+Q)
+- **Global Hotkey**: Configure the keyboard shortcut (default: Ctrl+Q, also supports Ctrl+C+C like DeepL)
 - **Window Size**: Set translation window dimensions (default: 850x600)
 - **Run at Windows startup**: Auto-start with Windows
 

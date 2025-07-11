@@ -7,7 +7,7 @@ A powerful Windows utility that provides instant, high-quality translations usin
 ## 🌟 Key Features
 
 ### 🔥 Core Functionality
-- **Global Hotkey Translation**: Works system-wide with customizable shortcuts (default: `Ctrl+Q`)
+- **Global Hotkey Translation**: Works system-wide with customizable shortcuts (default: `Ctrl+Q`, also supports `Ctrl+C+C` like DeepL)
 - **Multiple Translation Services**: Choose from Google Translate, Yandex Translate, ChatGPT, or confidential Translation Server
 - **Intelligent Language Detection**: Automatically detects text script and suggests optimal language pairs
 - **Auto-Switching Languages**: Smart language switching based on clipboard content analysis

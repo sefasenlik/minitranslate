@@ -39,6 +39,8 @@ namespace MiniTranslate
         private CheckBox autoSwitchLanguagesCheckBox;
         private NumericUpDown widthNumeric;
         private NumericUpDown heightNumeric;
+        private ComboBox hotkeyTypeComboBox;
+        private Label hotkeyTypeLabel;
 
         // Hotkey modifiers
         private const int MOD_CONTROL = 0x0002;
@@ -55,6 +57,7 @@ namespace MiniTranslate
             {
                 HotkeyModifiers = currentSettings.HotkeyModifiers,
                 HotkeyKey = currentSettings.HotkeyKey,
+                HotkeyType = currentSettings.HotkeyType,
                 SourceLanguage = currentSettings.SourceLanguage,
                 TargetLanguage = currentSettings.TargetLanguage,
                 PreferredTranslator = currentSettings.PreferredTranslator,
@@ -62,7 +65,6 @@ namespace MiniTranslate
                 WindowHeight = currentSettings.WindowHeight,
                 PreferredBrowser = currentSettings.PreferredBrowser,
                 ChatGptApiKey = currentSettings.ChatGptApiKey,
-                ChatGptApiServerUrl = currentSettings.ChatGptApiServerUrl,
                 TranslationServerUrl = currentSettings.TranslationServerUrl,
                 TranslationServerToken = currentSettings.TranslationServerToken,
                 AutoSwitchLanguages = currentSettings.AutoSwitchLanguages
@@ -75,7 +77,7 @@ namespace MiniTranslate
         private void InitializeComponent()
         {
             this.Text = "MiniTranslate Settings";
-            this.Size = new Size(520, 640);
+            this.Size = new Size(520, 650);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -180,8 +182,8 @@ namespace MiniTranslate
 
             sourceLanguageCombo = new ComboBox
             {
-                Location = new Point(130, 30),
-                Size = new Size(100, 23),
+                Location = new Point(125, 30),
+                Size = new Size(110, 23),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             languageGroupBox.Controls.Add(sourceLanguageCombo);
@@ -189,21 +191,24 @@ namespace MiniTranslate
             var targetLabel = new Label
             {
                 Text = "Target Language:",
-                Location = new Point(250, 32),
-                Size = new Size(110, 23)
+                Location = new Point(260, 32),
+                Size = new Size(105, 23)
             };
             languageGroupBox.Controls.Add(targetLabel);
 
             targetLanguageCombo = new ComboBox
             {
                 Location = new Point(365, 30),
-                Size = new Size(100, 23),
+                Size = new Size(95, 23),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             languageGroupBox.Controls.Add(targetLanguageCombo);
 
             // Populate language combo boxes after they're created and added
             PopulateLanguageComboBoxes();
+            
+            // Add event handler for source language selection change
+            sourceLanguageCombo.SelectedIndexChanged += SourceLanguageCombo_SelectedIndexChanged;
 
             // Auto-switch languages checkbox
             autoSwitchLanguagesCheckBox = new CheckBox
@@ -220,7 +225,7 @@ namespace MiniTranslate
             {
                 Text = "Global Hotkey",
                 Location = new Point(10, 305),
-                Size = new Size(480, 70)
+                Size = new Size(480, 90)
             };
             this.Controls.Add(hotkeyGroupBox);
 
@@ -280,11 +285,31 @@ namespace MiniTranslate
 
             PopulateKeyComboBox();
 
+            // Hotkey type selection (inside hotkey group)
+            hotkeyTypeLabel = new Label
+            {
+                Text = "Type:",
+                Location = new Point(330, 32),
+                Size = new Size(35, 23)
+            };
+            hotkeyGroupBox.Controls.Add(hotkeyTypeLabel);
+
+            hotkeyTypeComboBox = new ComboBox
+            {
+                Location = new Point(370, 30),
+                Size = new Size(70, 23),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            hotkeyTypeComboBox.Items.Add("Single");
+            hotkeyTypeComboBox.Items.Add("Double");
+            hotkeyTypeComboBox.SelectedIndexChanged += UpdateCurrentHotkeyDisplay;
+            hotkeyGroupBox.Controls.Add(hotkeyTypeComboBox);
+
             // Current hotkey display (inside hotkey group)
             var currentLabel = new Label
             {
                 Text = "Current: Ctrl+Q",
-                Location = new Point(340, 32),
+                Location = new Point(15, 62),
                 Size = new Size(200, 20),
                 ForeColor = Color.Blue
             };
@@ -295,7 +320,7 @@ namespace MiniTranslate
             windowSizeGroupBox = new GroupBox
             {
                 Text = "Browser Settings",
-                Location = new Point(10, 385),
+                Location = new Point(10, 405),
                 Size = new Size(480, 110)
             };
             this.Controls.Add(windowSizeGroupBox);
@@ -367,7 +392,7 @@ namespace MiniTranslate
             startupCheckBox = new CheckBox
             {
                 Text = "Run at Windows startup",
-                Location = new Point(20, 515),
+                Location = new Point(20, 530),
                 Size = new Size(180, 23)
             };
             this.Controls.Add(startupCheckBox);
@@ -376,7 +401,7 @@ namespace MiniTranslate
             testButton = new Button
             {
                 Text = "Test Translation",
-                Location = new Point(20, 550),
+                Location = new Point(20, 565),
                 Size = new Size(120, 30),
                 BackColor = Color.FromArgb(225, 240, 255),
                 FlatStyle = FlatStyle.Flat,
@@ -390,7 +415,7 @@ namespace MiniTranslate
             okButton = new Button
             {
                 Text = "OK",
-                Location = new Point(330, 550),
+                Location = new Point(330, 565),
                 Size = new Size(75, 30)
             };
             okButton.DialogResult = DialogResult.OK;
@@ -400,7 +425,7 @@ namespace MiniTranslate
             cancelButton = new Button
             {
                 Text = "Cancel",
-                Location = new Point(415, 550),
+                Location = new Point(415, 565),
                 Size = new Size(75, 30)
             };
             cancelButton.DialogResult = DialogResult.Cancel;
@@ -435,7 +460,12 @@ namespace MiniTranslate
             {
                 var item = new LanguageItem { Code = lang.Key, Name = lang.Value };
                 sourceLanguageCombo.Items.Add(item);
-                targetLanguageCombo.Items.Add(item);
+                
+                // Exclude "auto" from target language list
+                if (lang.Key != "auto")
+                {
+                    targetLanguageCombo.Items.Add(item);
+                }
             }
         }
 
@@ -488,11 +518,17 @@ namespace MiniTranslate
             
             keyComboBox.SelectedItem = (Keys)Settings.HotkeyKey;
             
+            // Load hotkey type setting
+            hotkeyTypeComboBox.SelectedIndex = (int)Settings.HotkeyType;
+            
             // Load browser setting
             browserComboBox.SelectedIndex = (int)Settings.PreferredBrowser;
             
             // Load auto-switch languages setting
             autoSwitchLanguagesCheckBox.Checked = Settings.AutoSwitchLanguages;
+            
+            // Update auto-switch checkbox state based on source language
+            UpdateAutoSwitchCheckBoxState();
             
             UpdateCurrentHotkeyDisplay(null, null);
         }
@@ -514,7 +550,18 @@ namespace MiniTranslate
                     parts.Add(keyComboBox.SelectedItem.ToString());
                 }
                 
-                currentLabel.Text = parts.Count > 0 ? $"Current: {string.Join("+", parts)}" : "Current: (none)";
+                var hotkeyString = parts.Count > 0 ? string.Join("+", parts) : "(none)";
+                
+                // Add double key indicator if selected
+                if (hotkeyTypeComboBox.SelectedIndex == 1) // Double Key
+                {
+                    if (keyComboBox.SelectedItem != null)
+                    {
+                        hotkeyString += "+" + keyComboBox.SelectedItem.ToString();
+                    }
+                }
+                
+                currentLabel.Text = $"Current: {hotkeyString}";
             }
         }
 
@@ -758,6 +805,13 @@ namespace MiniTranslate
                 return;
             }
 
+            if (hotkeyTypeComboBox.SelectedIndex == -1)
+            {
+                MessageBox.Show("Please select a hotkey type.", "MiniTranslate", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             // Save settings
             Settings.PreferredTranslator = (TranslatorType)translatorComboBox.SelectedIndex;
             Settings.WindowWidth = (int)widthNumeric.Value;
@@ -775,6 +829,9 @@ namespace MiniTranslate
             if (winCheckBox.Checked) Settings.HotkeyModifiers |= MOD_WIN;
             
             Settings.HotkeyKey = (int)(Keys)keyComboBox.SelectedItem;
+            
+            // Save hotkey type setting
+            Settings.HotkeyType = (HotkeyType)hotkeyTypeComboBox.SelectedIndex;
             
             // Save browser setting
             Settings.PreferredBrowser = (BrowserType)browserComboBox.SelectedIndex;
@@ -810,6 +867,29 @@ namespace MiniTranslate
             translationServerUrlTextBox.Enabled = isTranslationServer;
             translationServerTokenLabel.Enabled = isTranslationServer;
             translationServerTokenTextBox.Enabled = isTranslationServer;
+        }
+        
+        private void SourceLanguageCombo_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            UpdateAutoSwitchCheckBoxState();
+        }
+        
+        private void UpdateAutoSwitchCheckBoxState()
+        {
+            var selectedItem = sourceLanguageCombo.SelectedItem as LanguageItem;
+            bool isAutoLanguage = selectedItem?.Code == "auto";
+            
+            if (isAutoLanguage)
+            {
+                autoSwitchLanguagesCheckBox.Enabled = false;
+                autoSwitchLanguagesCheckBox.Checked = false;
+                autoSwitchLanguagesCheckBox.Text = "Auto-switch languages (disabled when 'Detect language' is selected)";
+            }
+            else
+            {
+                autoSwitchLanguagesCheckBox.Enabled = true;
+                autoSwitchLanguagesCheckBox.Text = "Auto-switch languages based on detected text script";
+            }
         }
     }
 } 
