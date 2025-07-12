@@ -1,14 +1,15 @@
 # MiniTranslate - Complete User Guide
 
-A lightweight utility for instant, hotkey-based text translation with multiple translation service options.
+A lightweight utility for instant, hotkey-based text translation with multiple translation service options and context-aware translations.
 
 ## Table of Contents
 1. [Download & Installation](#download--installation)
 2. [Quick Start](#quick-start)
 3. [Translation Services](#translation-services)
-4. [Configuration](#configuration)
-5. [Troubleshooting](#troubleshooting)
-6. [Uninstalling](#uninstalling)
+4. [Context-Aware Translations](#context-aware-translations)
+5. [Configuration](#configuration)
+6. [Troubleshooting](#troubleshooting)
+7. [Uninstalling](#uninstalling)
 
 ## Download & Installation
 
@@ -28,7 +29,7 @@ A lightweight utility for instant, hotkey-based text translation with multiple t
 MiniTranslate supports four different translation services. Each has its own advantages:
 
 ### 1. Translation Server (Recommended)
-**Best for**: High-quality translations, works worldwide, secure API key storage
+**Best for**: High-quality translations, works worldwide, secure API key storage, context-aware translations
 
 **Features**:
 - Uses ChatGPT API for high-quality translations
@@ -36,6 +37,7 @@ MiniTranslate supports four different translation services. Each has its own adv
 - Works in all regions (including Russia where ChatGPT is blocked)
 - Native Windows dialog interface
 - Supports 35+ languages
+- Context-aware translations with requirements input
 
 **Setup Instructions**:
 1. **Contact for Token**: Email `senliksefa@gmail.com` to receive your server token
@@ -49,13 +51,14 @@ MiniTranslate supports four different translation services. Each has its own adv
 **Cost**: Free (server token provided by request)
 
 ### 2. ChatGPT Translator
-**Best for**: High-quality translations, direct API control
+**Best for**: High-quality translations, direct API control, context-aware translations
 
 **Features**:
 - Uses ChatGPT API for high-quality translations
 - Native Windows dialog interface
 - Direct API key management
 - Supports 35+ languages
+- Context-aware translations with requirements input
 
 **Setup Instructions**:
 1. **Get API Key**: 
@@ -107,6 +110,53 @@ MiniTranslate supports four different translation services. Each has its own adv
 
 **Cost**: Free
 
+## Context-Aware Translations
+
+Both ChatGPT Translator and Translation Server support context input for more accurate translations. This feature allows you to provide additional information about your translation requirements.
+
+### How to Use Context
+
+1. **Open Translation Interface**: Press your hotkey after copying text
+2. **Find Context Field**: Look for the context input field at the bottom of the translation window
+3. **Enter Requirements**: Type your translation requirements, such as:
+   - "female speaker, formal tone"
+   - "technical document, use industry terminology"
+   - "casual conversation, informal style"
+   - "medical context, use proper medical terms"
+   - "translate 'hello' as 'hi' in this context"
+
+### Context Examples
+
+**Speaker Context**:
+- "male speaker, formal tone"
+- "female speaker, casual conversation"
+- "child speaking to adult"
+
+**Domain Context**:
+- "technical documentation"
+- "medical terminology"
+- "legal document"
+- "academic paper"
+- "creative writing"
+
+**Style Requirements**:
+- "formal business communication"
+- "informal friendly tone"
+- "academic writing style"
+- "creative and engaging"
+
+**Specific Terms**:
+- "use 'hi' instead of 'hello'"
+- "translate 'car' as 'automobile' in this context"
+- "prefer British English spelling"
+
+### Benefits of Context
+
+- **More Accurate Translations**: Context helps the AI understand your specific needs
+- **Consistent Terminology**: Ensures consistent use of preferred terms
+- **Appropriate Tone**: Matches the intended communication style
+- **Domain-Specific Language**: Uses appropriate terminology for the subject matter
+
 ## Configuration
 
 ### Quick Settings (Tray Menu)
@@ -144,6 +194,30 @@ Right-click the tray icon and select "Settings" for full configuration:
 - **German → English** (de → en)
 - **Japanese → English** (ja → en)
 
+### Language Support
+
+MiniTranslate supports **35+ languages** including:
+
+**European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Serbian, Lithuanian, Hungarian, Romanian, Croatian, Greek
+
+**Asian Languages**: Chinese, Japanese, Korean, Arabic, Hindi, Thai, Vietnamese, Indonesian, Malay
+
+**Other Scripts**: Hebrew
+
+### Intelligent Language Detection
+
+The app automatically detects text scripts and suggests optimal language pairs:
+- **Cyrillic**: Russian, Ukrainian, Bulgarian, Serbian
+- **Latin**: English, European languages
+- **Arabic**: Arabic languages
+- **Chinese**: Chinese (Simplified/Traditional)
+- **Japanese**: Japanese (Hiragana, Katakana, Kanji)
+- **Korean**: Korean (Hangul)
+- **Greek**: Greek
+- **Hebrew**: Hebrew
+- **Thai**: Thai
+- **Devanagari**: Hindi
+
 ## Troubleshooting
 
 ### Hotkey Not Working
@@ -173,6 +247,12 @@ Right-click the tray icon and select "Settings" for full configuration:
 - Contact senliksefa@gmail.com if you need a new token
 - Ensure your internet connection is working
 
+### Context Not Working
+- Context feature is only available with ChatGPT Translator and Translation Server
+- Make sure you're using one of these services
+- Check that the context field is visible in the translation window
+- Try refreshing the translation window if context field doesn't appear
+
 ### Application Won't Start
 - Check your system tray - only one instance can run at a time
 - Try running as administrator if you encounter permission issues
@@ -195,12 +275,14 @@ Right-click the tray icon and select "Settings" for full configuration:
 
 ✅ **Global Hotkeys** - Works from any application
 ✅ **Multiple Translation Services** - Choose from 4 different options
+✅ **Context-Aware Translations** - Provide context for more accurate results
 ✅ **System Tray** - Runs quietly in background
 ✅ **Single Instance** - Won't create duplicates
 ✅ **Settings Persistence** - Remembers your configuration
 ✅ **Clean Interface** - No toolbars or browser UI clutter
 ✅ **Multi-Language Support** - 35-100+ languages depending on service
 ✅ **Auto Language Detection** - Automatically detects source language
+✅ **Intelligent Script Detection** - Detects Cyrillic, Latin, Arabic, Chinese, Japanese, Korean, Greek, Hebrew, Thai, Devanagari
 ✅ **Customizable Hotkeys** - Set your preferred keyboard shortcuts
 ✅ **Startup Integration** - Auto-start with Windows
 

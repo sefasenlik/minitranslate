@@ -36,7 +36,7 @@ namespace MiniTranslate
         public TranslatorType PreferredTranslator { get; set; } = TranslatorType.TranslationServer;
         public int WindowWidth { get; set; } = 850;
         public int WindowHeight { get; set; } = 600;
-        public BrowserType PreferredBrowser { get; set; } = BrowserType.Chrome;
+        public BrowserType PreferredBrowser { get; set; } = BrowserType.Edge;
         public string ChatGptApiKey { get; set; } = string.Empty;
         public string TranslationServerUrl { get; set; } = "https://api.sefa.name.tr";
         public bool AutoSwitchLanguages { get; set; } = true;

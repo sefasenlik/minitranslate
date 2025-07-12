@@ -1,6 +1,6 @@
 # MiniTranslate - Advanced Translation Utility
 
-A powerful Windows utility that provides instant, high-quality translations using global keyboard shortcuts. MiniTranslate rivals DeepL in translation quality while offering unique features like regional accessibility and confidential server-side processing.
+A powerful Windows utility that provides instant, high-quality translations using global keyboard shortcuts. MiniTranslate rivals DeepL in translation quality while offering unique features like regional accessibility, confidential server-side processing, and context-aware translations.
 
 <img src="https://gcdnb.pbrd.co/images/38DcE19tdp5j.png" width="450" />
 
@@ -12,13 +12,13 @@ A powerful Windows utility that provides instant, high-quality translations usin
 - **Intelligent Language Detection**: Automatically detects text script and suggests optimal language pairs
 - **Auto-Switching Languages**: Smart language switching based on clipboard content analysis
 - **Regional Accessibility**: Translation Server option works in all regions, including Russia where ChatGPT is blocked
+- **Context-Aware Translations**: Provide translation context and requirements for more accurate results
 
 ### 🎯 Translation Services
 - **Google Translate**: Fast, reliable translations with extensive language support (100+ languages)
 - **Yandex Translate**: High-quality translations with excellent Russian language support (90+ languages)
 - **ChatGPT Translator**: AI-powered translations with superior quality and context understanding (35+ languages)
 - **Translation Server**: Confidential server-side processing with token-based authentication, rivals DeepL quality
-- **Context Support**: Provide translation context and requirements (e.g., male/female speaker, preferred terms) for more accurate translations
 
 ### 🌐 Browser Integration
 - **Multiple Browser Support**: Chrome, Edge, or default browser
@@ -42,6 +42,7 @@ A powerful Windows utility that provides instant, high-quality translations usin
 - **Built-in Web Server**: Local Node.js server for serving translation interfaces
 - **Comprehensive Logging**: Detailed logging for debugging and monitoring
 - **Hotkey Conflict Detection**: Automatic detection and warning of hotkey conflicts
+- **Script Detection**: Automatically detects Cyrillic, Latin, Arabic, Chinese, Japanese, Korean, Greek, Hebrew, Thai, and Devanagari scripts
 
 ## 🚀 Installation & Quick Start
 
@@ -113,6 +114,13 @@ MiniTranslate supports **35+ languages** including:
 ### Intelligent Language Detection
 The app automatically detects text scripts (Cyrillic, Latin, Arabic, Chinese, Japanese, Korean, Greek, Hebrew, Thai, Devanagari) and suggests optimal language pairs for translation.
 
+### Context-Aware Translations
+Both ChatGPT Translator and Translation Server support context input to provide more accurate translations:
+- **Speaker Context**: Specify male/female speaker, formal/informal tone
+- **Domain Context**: Technical, medical, legal, casual, etc.
+- **Style Requirements**: Formal, informal, academic, creative
+- **Specific Terms**: Preferred terminology or translations for specific words
+
 ## 🏢 Enterprise Features
 
 ### Translation Server Integration
@@ -123,6 +131,7 @@ The app automatically detects text scripts (Cyrillic, Latin, Arabic, Chinese, Ja
 - **Admin Panel**: Web-based user management interface
 - **Docker Support**: Easy deployment with Docker containers
 - **Load Balancing**: Support for multiple server instances
+- **User Management**: Token-based user authentication and usage tracking
 
 For server setup instructions, see [docs/CHATGPT_API_SETUP.md](docs/CHATGPT_API_SETUP.md).
 

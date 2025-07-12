@@ -1,12 +1,13 @@
 # ChatGPT Translation API Server
 
-A Node.js/Express server that provides ChatGPT translation services via REST API. This server can be deployed to bypass regional restrictions and provide translation services to your MiniTranslate application.
+A Node.js/Express server that provides ChatGPT translation services via REST API with context-aware translations and user management. This server can be deployed to bypass regional restrictions and provide translation services to your MiniTranslate application.
 
 **🔒 Privacy First: This server does NOT log or store any translation text. All translations are processed in memory and never written to disk or logs.**
 
 ## Features
 
 - **No logging of translations** – translation text is never stored or logged
+- **Context-aware translations** – support for translation requirements and context
 - **RESTful API** for ChatGPT translations
 - **CORS enabled** for cross-origin requests
 - **Input validation** and error handling
@@ -14,6 +15,9 @@ A Node.js/Express server that provides ChatGPT translation services via REST API
 - **Language support** for 35+ languages
 - **Rate limiting** (optional)
 - **Environment configuration**
+- **User management** with token-based authentication
+- **Admin panel** for user management and monitoring
+- **Usage tracking** for monitoring and billing
 
 ## Quick Start
 
@@ -61,12 +65,13 @@ Returns server status and uptime information.
 ```
 POST /translate
 Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN
 
 {
   "text": "Hello world",
   "sourceLang": "en",
   "targetLang": "ru",
-  "apiKey": "sk-your-api-key"
+  "context": "formal tone"
 }
 ```
 
@@ -77,7 +82,8 @@ Content-Type: application/json
   "translation": "Привет мир",
   "sourceLang": "en",
   "targetLang": "ru",
-  "originalText": "Hello world"
+  "originalText": "Hello world",
+  "context": "formal tone"
 }
 ```
 
@@ -86,6 +92,51 @@ Content-Type: application/json
 GET /languages
 ```
 Returns list of all supported languages.
+
+### User Management
+```
+GET /admin/users
+POST /admin/users
+DELETE /admin/users/:token
+```
+
+## Context-Aware Translations
+
+The server supports context input for more accurate translations. This feature allows users to provide additional information about their translation requirements.
+
+### Context Features
+- **Speaker Context**: Specify male/female speaker, formal/informal tone
+- **Domain Context**: Technical, medical, legal, casual, etc.
+- **Style Requirements**: Formal, informal, academic, creative
+- **Specific Terms**: Preferred terminology or translations for specific words
+
+### Context Examples
+```javascript
+// Translation with context
+{
+  "text": "Hello, how are you?",
+  "sourceLang": "en",
+  "targetLang": "ru",
+  "context": "female speaker, formal tone"
+}
+```
+
+### Context Processing
+The server processes context by:
+1. Including context in the ChatGPT prompt
+2. Providing specific instructions based on context
+3. Ensuring consistent terminology usage
+4. Maintaining appropriate tone and style
+
+## Language Support
+
+The server supports **35+ languages** including:
+
+**European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Latvian, Lithuanian, Hungarian, Romanian, Croatian, Greek
+
+**Asian Languages**: Chinese, Japanese, Korean, Arabic, Hindi, Thai, Vietnamese, Indonesian, Malay
+
+**Other Scripts**: Hebrew
 
 ## Deployment Options
 
@@ -167,12 +218,35 @@ docker run -p 3000:3000 translation-api
 3. **Validate API keys** on your server
 4. **Monitor usage** and costs
 5. **Set up logging** for debugging (never logs translation text)
+6. **Implement user authentication** with tokens
+7. **Use admin panel** for user management
+
+## User Management
+
+### Admin Panel
+Access the admin panel at `https://your-domain.com/admin.html` to:
+- View all users and their usage
+- Generate new tokens
+- Monitor server performance
+- Track translation requests
+
+### Token Authentication
+- Secure token-based authentication
+- User usage tracking and monitoring
+- Token generation and validation
+- Admin panel for user management
 
 ## Integration with MiniTranslate
 
 After deploying your server, update your MiniTranslate application to use the API instead of the local HTML file.
 
 The server URL will be: `https://your-server.com:3000/translate`
+
+### Context Support in MiniTranslate
+- Context field appears in translation interface
+- Context is automatically passed to server
+- Server processes context for more accurate translations
+- Context is included in translation requests
 
 ## Monitoring
 
@@ -187,6 +261,48 @@ pm2 logs translation-api
 pm2 monit
 ```
 
+### User Management
+```bash
+# View all users
+curl https://your-server.com/admin/users
+
+# Generate new token
+curl -X POST https://your-server.com/admin/users
+```
+
+## Testing
+
+### Test Translation
+```bash
+curl -X POST https://your-server.com/translate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "text": "Hello world",
+    "sourceLang": "en",
+    "targetLang": "ru",
+    "context": "formal tone"
+  }'
+```
+
+### Test Context Support
+```bash
+curl -X POST https://your-server.com/translate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "text": "Hello, how are you?",
+    "sourceLang": "en",
+    "targetLang": "ru",
+    "context": "female speaker, casual conversation"
+  }'
+```
+
+### Test Languages
+```bash
+curl https://your-server.com/languages
+```
+
 ## Troubleshooting
 
 ### Common Issues
@@ -195,6 +311,8 @@ pm2 monit
 2. **API key errors**: Verify ChatGPT API key format
 3. **Rate limiting**: Check OpenAI API limits
 4. **Server not starting**: Check PORT availability
+5. **Context not working**: Verify context is being passed correctly
+6. **User management issues**: Check admin panel accessibility
 
 ### Debug Mode
 
@@ -202,6 +320,17 @@ Enable debug logging:
 ```bash
 DEBUG=* npm start
 ```
+
+### Context Not Working
+- Verify context is being passed in requests
+- Check server logs for context processing
+- Ensure context field is visible in MiniTranslate interface
+
+### User Management Issues
+- Check admin panel accessibility
+- Verify token generation process
+- Monitor user usage tracking
+- Check server logs for authentication errors
 
 ## License
 
