@@ -67,8 +67,8 @@ jobs:
         copy icon.ico publish\
         copy README.md publish\
         
-        # Copy documentation
-        mkdir publish\docs
+        # Create docs directory if it doesn't exist and copy documentation
+        if (!(Test-Path "publish\docs")) { New-Item -ItemType Directory -Path "publish\docs" -Force }
         copy docs\CHATGPT_SETUP.md publish\docs\
         copy docs\CHATGPT_API_SETUP.md publish\docs\
         copy docs\HOW_TO_USE.md publish\docs\
