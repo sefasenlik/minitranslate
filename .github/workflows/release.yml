@@ -32,6 +32,9 @@ on:
         default: false
         type: boolean
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: windows-latest
@@ -67,11 +70,16 @@ jobs:
         copy icon.ico publish\
         copy README.md publish\
         
-        # Copy documentation
-        mkdir publish\docs
+        # Create docs directory if it doesn't exist and copy documentation
+        if (!(Test-Path "publish\docs")) { New-Item -ItemType Directory -Path "publish\docs" -Force }
         copy docs\CHATGPT_SETUP.md publish\docs\
         copy docs\CHATGPT_API_SETUP.md publish\docs\
         copy docs\HOW_TO_USE.md publish\docs\
+    
+    - name: List files for debugging
+      run: |
+        echo "Files in publish directory:"
+        Get-ChildItem -Path "publish" -Recurse | ForEach-Object { Write-Host $_.FullName }
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -103,7 +111,7 @@ jobs:
           publish/*.js
           publish/icon.ico
           publish/README.md
-          publish/docs/
+          publish/docs/*.md
         draft: ${{ github.event.inputs.is_draft || false }}
         prerelease: ${{ github.event.inputs.is_prerelease || false }}
       env:
