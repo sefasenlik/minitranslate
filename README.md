@@ -2,7 +2,8 @@
 
 A powerful Windows utility that provides instant, high-quality translations using global keyboard shortcuts. MiniTranslate rivals DeepL in translation quality while offering unique features like regional accessibility, confidential server-side processing, and context-aware translations.
 
-<img src="https://gcdnb.pbrd.co/images/38DcE19tdp5j.png" width="450" />
+
+<img src="https://i.postimg.cc/CLQnR8G8/Mini-Translate-Sample-Translation.png" width="800" />
 
 ## 🌟 Key Features
 
@@ -64,6 +65,8 @@ A powerful Windows utility that provides instant, high-quality translations usin
 For detailed installation and usage instructions, see [docs/HOW_TO_USE.md](docs/HOW_TO_USE.md).
 
 ## 🔧 Configuration
+
+<img src="https://i.postimg.cc/LXNrH2cH/Mini-Translate-Settings.png" width="450" />
 
 ### Quick Settings (System Tray)
 Right-click the tray icon for instant access to:
