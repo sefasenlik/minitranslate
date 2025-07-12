@@ -76,10 +76,17 @@ jobs:
         copy docs\CHATGPT_API_SETUP.md publish\docs\
         copy docs\HOW_TO_USE.md publish\docs\
     
+    - name: Create ZIP package
+      run: |
+        # Create a ZIP file with all necessary files
+        Compress-Archive -Path "publish\*" -DestinationPath "MiniTranslate-Release.zip" -Force
+    
     - name: List files for debugging
       run: |
         echo "Files in publish directory:"
         Get-ChildItem -Path "publish" -Recurse | ForEach-Object { Write-Host $_.FullName }
+        echo "ZIP file created:"
+        Get-ChildItem -Path "MiniTranslate-Release.zip"
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
@@ -96,14 +103,38 @@ jobs:
           - Improved user interface
           - Better language support
           
-          ### Installation
-          1. Download the `MiniTranslate.exe` file
-          2. Run the executable
-          3. Configure your preferred translation service
+          ### Installation Instructions
+          
+          **Option 1: Download ZIP Package (Recommended)**
+          1. Download `MiniTranslate-Release.zip`
+          2. Extract all files to a folder
+          3. Run `MiniTranslate.exe`
+          4. Configure your preferred translation service
+          
+          **Option 2: Download Individual Files**
+          If you prefer to download individual files, download all files from the release.
+          
+          ### Required Files
+          - `MiniTranslate.exe` - Main application
+          - `*.dll` files - .NET runtime libraries
+          - `*.json` files - Configuration files
+          - `*.html` files - Translation interfaces
+          - `*.js` files - Web server components
+          - `icon.ico` - Application icon
+          - `README.md` - Basic documentation
+          - `docs/` folder - Detailed setup guides
           
           ### Documentation
-          See the `docs/` folder for detailed setup guides.
+          See the `docs/` folder for detailed setup guides:
+          - `HOW_TO_USE.md` - Complete user guide
+          - `CHATGPT_SETUP.md` - ChatGPT API setup
+          - `CHATGPT_API_SETUP.md` - Translation server setup
+          
+          ### System Requirements
+          - Windows 10/11
+          - No additional .NET installation required (self-contained)
         files: |
+          MiniTranslate-Release.zip
           publish/MiniTranslate.exe
           publish/*.dll
           publish/*.json
