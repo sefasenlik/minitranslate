@@ -1,6 +1,6 @@
 # Translation Server Setup Guide (Developer)
 
-Technical guide for setting up a custom translation server to work with MiniTranslate's "Translation Server" option.
+Technical guide for setting up a custom translation server to work with MiniTranslate's "Translation Server" option with context-aware translations and user management.
 
 ## Prerequisites
 
@@ -44,7 +44,7 @@ cd /var/www/translation-api
 npm install
 ```
 
-### Step 3: Configure Environment
+### Step 4: Configure Environment
 
 ```bash
 cp env.example .env
@@ -69,7 +69,7 @@ RATE_LIMIT_MAX_REQUESTS=100
 CORS_ORIGIN=*
 ```
 
-### Step 4: Start Server
+### Step 5: Start Server
 
 #### Option A: Docker (Recommended)
 ```bash
@@ -113,7 +113,8 @@ Authorization: Bearer YOUR_TOKEN
 {
   "text": "Hello world",
   "sourceLang": "en",
-  "targetLang": "ru"
+  "targetLang": "ru",
+  "context": "formal tone"
 }
 ```
 
@@ -124,7 +125,8 @@ Response:
   "translation": "Привет мир",
   "sourceLang": "en",
   "targetLang": "ru",
-  "originalText": "Hello world"
+  "originalText": "Hello world",
+  "context": "formal tone"
 }
 ```
 
@@ -132,6 +134,51 @@ Response:
 ```
 GET /languages
 ```
+
+### User Management
+```
+GET /admin/users
+POST /admin/users
+DELETE /admin/users/:token
+```
+
+## Context-Aware Translations
+
+The Translation Server supports context input for more accurate translations. This feature allows users to provide additional information about their translation requirements.
+
+### Context Features
+- **Speaker Context**: Specify male/female speaker, formal/informal tone
+- **Domain Context**: Technical, medical, legal, casual, etc.
+- **Style Requirements**: Formal, informal, academic, creative
+- **Specific Terms**: Preferred terminology or translations for specific words
+
+### Context Examples
+```javascript
+// Translation with context
+{
+  "text": "Hello, how are you?",
+  "sourceLang": "en",
+  "targetLang": "ru",
+  "context": "female speaker, formal tone"
+}
+```
+
+### Context Processing
+The server processes context by:
+1. Including context in the ChatGPT prompt
+2. Providing specific instructions based on context
+3. Ensuring consistent terminology usage
+4. Maintaining appropriate tone and style
+
+## Language Support
+
+The Translation Server supports **35+ languages** including:
+
+**European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Serbian, Lithuanian, Hungarian, Romanian, Croatian, Greek
+
+**Asian Languages**: Chinese, Japanese, Korean, Arabic, Hindi, Thai, Vietnamese, Indonesian, Malay
+
+**Other Scripts**: Hebrew
 
 ## Security Configuration
 
@@ -162,6 +209,12 @@ RATE_LIMIT_WINDOW_MS=900000  # 15 minutes
 RATE_LIMIT_MAX_REQUESTS=100  # 100 requests per window
 ```
 
+### User Authentication
+- Token-based authentication
+- User management through admin panel
+- Usage tracking and monitoring
+- Secure token generation and validation
+
 ## Monitoring
 
 ### PM2 Monitoring
@@ -176,6 +229,13 @@ pm2 status
 curl https://your-domain.com/health
 ```
 
+### User Management
+Access the admin panel at `https://your-domain.com/admin.html` to:
+- View all users and their usage
+- Generate new tokens
+- Monitor server performance
+- Track translation requests
+
 ## Testing
 
 ### Test Translation
@@ -186,13 +246,27 @@ curl -X POST https://your-domain.com/translate \
   -d '{
     "text": "Hello world",
     "sourceLang": "en",
-    "targetLang": "ru"
+    "targetLang": "ru",
+    "context": "formal tone"
   }'
 ```
 
 ### Test Languages
 ```bash
 curl https://your-domain.com/languages
+```
+
+### Test Context Support
+```bash
+curl -X POST https://your-domain.com/translate \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "text": "Hello, how are you?",
+    "sourceLang": "en",
+    "targetLang": "ru",
+    "context": "female speaker, casual conversation"
+  }'
 ```
 
 ## MiniTranslate Integration
@@ -202,6 +276,12 @@ After server deployment, configure MiniTranslate:
 1. Set `PreferredTranslator` to `TranslatorType.TranslationServer`
 2. Set `TranslationServerUrl` to your server URL
 3. Set `TranslationServerToken` to your authentication token
+
+### Context Support in MiniTranslate
+- Context field appears in translation interface
+- Context is automatically passed to server
+- Server processes context for more accurate translations
+- Context is included in translation requests
 
 ## Troubleshooting
 
@@ -224,4 +304,15 @@ After server deployment, configure MiniTranslate:
 ### Rate Limiting
 - Monitor request frequency
 - Adjust rate limit settings
-- Check OpenAI API limits 
+- Check OpenAI API limits
+
+### Context Not Working
+- Verify context is being passed in requests
+- Check server logs for context processing
+- Ensure context field is visible in MiniTranslate interface
+
+### User Management Issues
+- Check admin panel accessibility
+- Verify token generation process
+- Monitor user usage tracking
+- Check server logs for authentication errors 

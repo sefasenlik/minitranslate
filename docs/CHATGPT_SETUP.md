@@ -1,6 +1,6 @@
 # ChatGPT API Key Setup Guide (Developer)
 
-Technical guide for obtaining and configuring ChatGPT API keys for MiniTranslate's "ChatGPT Translator" option.
+Technical guide for obtaining and configuring ChatGPT API keys for MiniTranslate's "ChatGPT Translator" option with context-aware translations.
 
 ## Prerequisites
 
@@ -41,9 +41,31 @@ Technical guide for obtaining and configuring ChatGPT API keys for MiniTranslate
 public string ChatGptApiKey { get; set; } = "sk-your-api-key-here";
 ```
 
+## Context-Aware Translations
+
+MiniTranslate's ChatGPT Translator supports context input for more accurate translations. This feature allows users to provide additional information about their translation requirements.
+
+### Context Features
+- **Speaker Context**: Specify male/female speaker, formal/informal tone
+- **Domain Context**: Technical, medical, legal, casual, etc.
+- **Style Requirements**: Formal, informal, academic, creative
+- **Specific Terms**: Preferred terminology or translations for specific words
+
+### Context Examples
+```javascript
+// Translation with context
+{
+  "text": "Hello, how are you?",
+  "sourceLang": "en",
+  "targetLang": "ru",
+  "context": "female speaker, formal tone"
+}
+```
+
 ## API Usage and Costs
 
 ### Pricing
+- **GPT-4o-mini**: $0.00015 per 1K input tokens, $0.0006 per 1K output tokens
 - **GPT-3.5-turbo**: $0.0015 per 1K input tokens, $0.002 per 1K output tokens
 - **GPT-4**: $0.03 per 1K input tokens, $0.06 per 1K output tokens
 - **Typical translation**: ~$0.001-0.005 per translation
@@ -51,7 +73,17 @@ public string ChatGptApiKey { get; set; } = "sk-your-api-key-here";
 ### Rate Limits
 - **Free tier**: 3 requests per minute
 - **Paid tier**: 3500 requests per minute
-- **Token limits**: 4096 tokens per request (GPT-3.5-turbo)
+- **Token limits**: 4096 tokens per request (GPT-3.5-turbo), 128K tokens (GPT-4o-mini)
+
+## Language Support
+
+MiniTranslate's ChatGPT Translator supports **35+ languages** including:
+
+**European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Latvian, Lithuanian, Hungarian, Romanian, Croatian, Greek
+
+**Asian Languages**: Chinese, Japanese, Korean, Arabic, Hindi, Thai, Vietnamese, Indonesian, Malay
+
+**Other Scripts**: Hebrew
 
 ## Testing API Key
 
@@ -100,6 +132,11 @@ public string ChatGptApiKey { get; set; } = "sk-your-api-key-here";
 - Verify account has sufficient credits
 - Contact OpenAI support if needed
 
+### Context Not Working
+- Ensure you're using ChatGPT Translator
+- Check that context field is visible in translation window
+- Verify context is being passed correctly in API requests
+
 ## API Endpoints Used
 
 ### Translation Request
@@ -109,20 +146,26 @@ Authorization: Bearer sk-your-api-key
 Content-Type: application/json
 
 {
-  "model": "gpt-3.5-turbo",
+  "model": "gpt-4o-mini",
   "messages": [
     {
-      "role": "system",
-      "content": "You are a professional translator. Translate the following text accurately."
-    },
-    {
       "role": "user",
-      "content": "Translate 'Hello world' from English to Russian"
+      "content": "Translate from English to Russian:\nHello world\nRequirements: formal tone"
     }
   ],
-  "max_tokens": 1000,
+  "max_tokens": 3000,
   "temperature": 0.3
 }
+```
+
+### Context-Aware Translation
+```javascript
+// Example with context
+const prompt = `Translate from ${sourceLanguageName} to ${targetLanguageName}:\n${text}`;
+if (context) {
+    prompt += `\nRequirements: ${context}`;
+}
+prompt += `\nOnly output the translation.`;
 ```
 
 ## Alternative Options
