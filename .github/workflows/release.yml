@@ -4,6 +4,33 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (e.g., v1.2.3)'
+        required: true
+        default: 'v1.0.0'
+        type: string
+      release_title:
+        description: 'Release title'
+        required: false
+        default: 'MiniTranslate Release'
+        type: string
+      release_notes:
+        description: 'Release notes (optional)'
+        required: false
+        default: 'Bug fixes and improvements'
+        type: string
+      is_prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        default: false
+        type: boolean
+      is_draft:
+        description: 'Create as draft release'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   build:
@@ -44,10 +71,30 @@ jobs:
         mkdir publish\docs
         copy docs\CHATGPT_SETUP.md publish\docs\
         copy docs\CHATGPT_API_SETUP.md publish\docs\
+        copy docs\HOW_TO_USE.md publish\docs\
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ github.event.inputs.release_version || github.ref_name }}
+        name: ${{ github.event.inputs.release_title || 'MiniTranslate Release' }}
+        body: |
+          ## MiniTranslate Release
+          
+          ${{ github.event.inputs.release_notes || 'Bug fixes and improvements' }}
+          
+          ### What's New
+          - Enhanced translation features
+          - Improved user interface
+          - Better language support
+          
+          ### Installation
+          1. Download the `MiniTranslate.exe` file
+          2. Run the executable
+          3. Configure your preferred translation service
+          
+          ### Documentation
+          See the `docs/` folder for detailed setup guides.
         files: |
           publish/MiniTranslate.exe
           publish/*.dll
@@ -57,7 +104,7 @@ jobs:
           publish/icon.ico
           publish/README.md
           publish/docs/
-        draft: false
-        prerelease: false
+        draft: ${{ github.event.inputs.is_draft || false }}
+        prerelease: ${{ github.event.inputs.is_prerelease || false }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
