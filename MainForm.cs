@@ -207,14 +207,21 @@ namespace MiniTranslate
             InitializeComponent();
             LoadSettings();
             InitializeTrayIcon();
-            if (settings.HotkeyType == HotkeyType.SingleKey)
-            {
-                RegisterGlobalHotKey();
-            }
-            else
+            
+            // Determine hotkey type based on key combination
+            // If CTRL+C is selected, use double press (clipboard monitoring)
+            // Otherwise, use single press (global hotkey)
+            bool isCtrlC = (settings.HotkeyModifiers & MOD_CONTROL) != 0 && settings.HotkeyKey == (int)Keys.C;
+            
+            if (isCtrlC)
             {
                 StartClipboardListener();
             }
+            else
+            {
+                RegisterGlobalHotKey();
+            }
+            
             UpdateTrayIconText();
             StartNodeServer();
             
@@ -404,9 +411,11 @@ namespace MiniTranslate
             
             var hotkeyString = string.Join("+", parts);
             
-            if (settings.HotkeyType == HotkeyType.DoubleKey)
+            // Add double press indicator for CTRL+C
+            bool isCtrlC = (settings.HotkeyModifiers & MOD_CONTROL) != 0 && settings.HotkeyKey == (int)Keys.C;
+            if (isCtrlC)
             {
-                hotkeyString += "+" + ((Keys)settings.HotkeyKey).ToString();
+                hotkeyString += " (Double)";
             }
             
             return hotkeyString;
@@ -415,7 +424,11 @@ namespace MiniTranslate
         private void RegisterGlobalHotKey()
         {
             UnregisterHotKey(this.Handle, hotKeyId);
-            if (settings.HotkeyType == HotkeyType.SingleKey)
+            
+            // Only register global hotkey if not CTRL+C (which uses clipboard monitoring)
+            bool isCtrlC = (settings.HotkeyModifiers & MOD_CONTROL) != 0 && settings.HotkeyKey == (int)Keys.C;
+            
+            if (!isCtrlC)
             {
                 if (!RegisterHotKey(this.Handle, hotKeyId, settings.HotkeyModifiers, settings.HotkeyKey))
                 {
@@ -423,15 +436,17 @@ namespace MiniTranslate
                         "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
-            // No registration for double-key mode
             UpdateTrayIcon();
         }
 
         protected override void WndProc(ref Message m)
         {
-            if (settings.HotkeyType == HotkeyType.DoubleKey && m.Msg == WM_CLIPBOARDUPDATE)
+            // Check if current hotkey is CTRL+C (which uses clipboard monitoring)
+            bool isCtrlC = (settings.HotkeyModifiers & MOD_CONTROL) != 0 && settings.HotkeyKey == (int)Keys.C;
+            
+            if (isCtrlC && m.Msg == WM_CLIPBOARDUPDATE)
             {
-                // Clipboard updated (copy event)
+                // Clipboard updated (copy event) - CTRL+C+C detection
                 var now = DateTime.Now;
                 var timeSinceLastCopy = (now - lastClipboardCopy).TotalMilliseconds;
                 if (timeSinceLastCopy <= DOUBLE_KEY_TIMEOUT_MS)
@@ -446,14 +461,8 @@ namespace MiniTranslate
             }
             else if (m.Msg == WM_HOTKEY && m.WParam.ToInt32() == hotKeyId)
             {
-                if (settings.HotkeyType == HotkeyType.DoubleKey)
-                {
-                    // Should never be called, but keep for safety
-                }
-                else
-                {
-                    OpenWebsite();
-                }
+                // Global hotkey pressed (for non-CTRL+C combinations)
+                OpenWebsite();
             }
             base.WndProc(ref m);
         }
@@ -755,14 +764,21 @@ namespace MiniTranslate
                     settings.Save();
                     UnregisterHotKey(this.Handle, hotKeyId);
                     StopClipboardListener();
-                    if (settings.HotkeyType == HotkeyType.SingleKey)
-                    {
-                        RegisterGlobalHotKey();
-                    }
-                    else
+                    
+                    // Determine hotkey type based on key combination
+                    // If CTRL+C is selected, use double press (clipboard monitoring)
+                    // Otherwise, use single press (global hotkey)
+                    bool isCtrlC = (settings.HotkeyModifiers & MOD_CONTROL) != 0 && settings.HotkeyKey == (int)Keys.C;
+                    
+                    if (isCtrlC)
                     {
                         StartClipboardListener();
                     }
+                    else
+                    {
+                        RegisterGlobalHotKey();
+                    }
+                    
                     UpdateTrayIconText();
                     UpdateTrayIcon();
                     BuildTrayMenu(); // Rebuild menu to reflect changes
