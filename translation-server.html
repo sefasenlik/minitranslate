@@ -163,7 +163,7 @@
         .context-field::placeholder {
             color: #666;
         }
-        @media (min-width: 769px) {
+        @media (min-width: 768px) {
             .controls {
                 flex-direction: row;
                 gap: 15px;
@@ -874,6 +874,54 @@
         // Attach event listeners to buttons
         document.getElementById('translateBtn').addEventListener('click', translate);
         document.getElementById('swapBtn').addEventListener('click', swapLanguages);
+
+        // Synchronize context fields
+        const contextField = document.getElementById('contextField');
+        const contextFieldDesktop = document.getElementById('contextFieldDesktop');
+
+        // Function to sync context fields
+        function syncContextFields(sourceField, targetField) {
+            if (sourceField && targetField) {
+                targetField.value = sourceField.value;
+            }
+        }
+
+        // Add event listeners to sync context fields
+        if (contextField) {
+            contextField.addEventListener('input', function() {
+                syncContextFields(this, contextFieldDesktop);
+            });
+            // Add ENTER key listener for translation
+            contextField.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    translate();
+                }
+            });
+        }
+
+        if (contextFieldDesktop) {
+            contextFieldDesktop.addEventListener('input', function() {
+                syncContextFields(this, contextField);
+            });
+            // Add ENTER key listener for translation
+            contextFieldDesktop.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    translate();
+                }
+            });
+        }
+
+        // Add ENTER key listener to source text field
+        document.getElementById('sourceText').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                translate();
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                translate();
+            }
+        });
 
         // Copy to clipboard
         document.getElementById('copyBtn').addEventListener('click', function() {

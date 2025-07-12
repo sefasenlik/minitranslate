@@ -39,8 +39,7 @@ namespace MiniTranslate
         private CheckBox autoSwitchLanguagesCheckBox;
         private NumericUpDown widthNumeric;
         private NumericUpDown heightNumeric;
-        private ComboBox hotkeyTypeComboBox;
-        private Label hotkeyTypeLabel;
+        // Removed hotkey type selection - now determined automatically based on key combination
 
         // Hotkey modifiers
         private const int MOD_CONTROL = 0x0002;
@@ -277,33 +276,13 @@ namespace MiniTranslate
             keyComboBox = new ComboBox
             {
                 Location = new Point(275, 30),
-                Size = new Size(40, 23),
+                Size = new Size(80, 23),
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
             keyComboBox.SelectedIndexChanged += UpdateCurrentHotkeyDisplay;
             hotkeyGroupBox.Controls.Add(keyComboBox);
 
             PopulateKeyComboBox();
-
-            // Hotkey type selection (inside hotkey group)
-            hotkeyTypeLabel = new Label
-            {
-                Text = "Type:",
-                Location = new Point(330, 32),
-                Size = new Size(35, 23)
-            };
-            hotkeyGroupBox.Controls.Add(hotkeyTypeLabel);
-
-            hotkeyTypeComboBox = new ComboBox
-            {
-                Location = new Point(370, 30),
-                Size = new Size(70, 23),
-                DropDownStyle = ComboBoxStyle.DropDownList
-            };
-            hotkeyTypeComboBox.Items.Add("Single");
-            hotkeyTypeComboBox.Items.Add("Double");
-            hotkeyTypeComboBox.SelectedIndexChanged += UpdateCurrentHotkeyDisplay;
-            hotkeyGroupBox.Controls.Add(hotkeyTypeComboBox);
 
             // Current hotkey display (inside hotkey group)
             var currentLabel = new Label
@@ -449,7 +428,14 @@ namespace MiniTranslate
 
             foreach (var key in commonKeys)
             {
-                keyComboBox.Items.Add(key);
+                if (key == Keys.C)
+                {
+                    keyComboBox.Items.Add("C (Double)");
+                }
+                else
+                {
+                    keyComboBox.Items.Add(key);
+                }
             }
         }
 
@@ -516,10 +502,15 @@ namespace MiniTranslate
             shiftCheckBox.Checked = (Settings.HotkeyModifiers & MOD_SHIFT) != 0;
             winCheckBox.Checked = (Settings.HotkeyModifiers & MOD_WIN) != 0;
             
-            keyComboBox.SelectedItem = (Keys)Settings.HotkeyKey;
-            
-            // Load hotkey type setting
-            hotkeyTypeComboBox.SelectedIndex = (int)Settings.HotkeyType;
+            // Handle the special case for 'C' key
+            if (Settings.HotkeyKey == (int)Keys.C)
+            {
+                keyComboBox.SelectedItem = "C (Double)";
+            }
+            else
+            {
+                keyComboBox.SelectedItem = (Keys)Settings.HotkeyKey;
+            }
             
             // Load browser setting
             browserComboBox.SelectedIndex = (int)Settings.PreferredBrowser;
@@ -547,18 +538,23 @@ namespace MiniTranslate
                 
                 if (keyComboBox.SelectedItem != null)
                 {
-                    parts.Add(keyComboBox.SelectedItem.ToString());
+                    var keyText = keyComboBox.SelectedItem.ToString();
+                    if (keyText == "C (Double)")
+                    {
+                        parts.Add("C");
+                    }
+                    else
+                    {
+                        parts.Add(keyText);
+                    }
                 }
                 
                 var hotkeyString = parts.Count > 0 ? string.Join("+", parts) : "(none)";
                 
-                // Add double key indicator if selected
-                if (hotkeyTypeComboBox.SelectedIndex == 1) // Double Key
+                // Add double press indicator for CTRL+C
+                if (keyComboBox.SelectedItem != null && keyComboBox.SelectedItem.ToString() == "C (Double)" && ctrlCheckBox.Checked)
                 {
-                    if (keyComboBox.SelectedItem != null)
-                    {
-                        hotkeyString += "+" + keyComboBox.SelectedItem.ToString();
-                    }
+                    hotkeyString += "+C";
                 }
                 
                 currentLabel.Text = $"Current: {hotkeyString}";
@@ -805,12 +801,7 @@ namespace MiniTranslate
                 return;
             }
 
-            if (hotkeyTypeComboBox.SelectedIndex == -1)
-            {
-                MessageBox.Show("Please select a hotkey type.", "MiniTranslate", 
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            // hotkeyTypeComboBox.SelectedIndex = -1; // Removed hotkey type selection
 
             // Save settings
             Settings.PreferredTranslator = (TranslatorType)translatorComboBox.SelectedIndex;
@@ -828,10 +819,17 @@ namespace MiniTranslate
             if (shiftCheckBox.Checked) Settings.HotkeyModifiers |= MOD_SHIFT;
             if (winCheckBox.Checked) Settings.HotkeyModifiers |= MOD_WIN;
             
-            Settings.HotkeyKey = (int)(Keys)keyComboBox.SelectedItem;
-            
-            // Save hotkey type setting
-            Settings.HotkeyType = (HotkeyType)hotkeyTypeComboBox.SelectedIndex;
+            // Handle the special case for 'C (Double)' key
+            if (keyComboBox.SelectedItem.ToString() == "C (Double)")
+            {
+                Settings.HotkeyKey = (int)Keys.C;
+                Settings.HotkeyType = HotkeyType.DoubleKey;
+            }
+            else
+            {
+                Settings.HotkeyKey = (int)(Keys)keyComboBox.SelectedItem;
+                Settings.HotkeyType = HotkeyType.SingleKey;
+            }
             
             // Save browser setting
             Settings.PreferredBrowser = (BrowserType)browserComboBox.SelectedIndex;
