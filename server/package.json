@@ -1,5 +1,5 @@
 {
-  "name": "chatgpt-translation-api",
+  "name": "minitranslate",
   "version": "1.0.0",
   "description": "ChatGPT Translation API Server",
   "main": "server.js",

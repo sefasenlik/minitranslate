@@ -32,8 +32,8 @@ docker pull node:18-alpine
 
 ```bash
 # Create server directory
-mkdir -p /var/www/translation-api
-cd /var/www/translation-api
+mkdir -p /var/www/minitranslate
+cd /var/www/minitranslate
 
 # Upload server files from the 'server' folder
 ```
@@ -83,7 +83,7 @@ docker-compose up -d
 npm install -g pm2
 
 # Start the server
-pm2 start server.js --name "translation-api"
+pm2 start server.js --name "minitranslate"
 
 # Save PM2 configuration
 pm2 save
@@ -220,7 +220,7 @@ RATE_LIMIT_MAX_REQUESTS=100  # 100 requests per window
 ### PM2 Monitoring
 ```bash
 pm2 monit
-pm2 logs translation-api
+pm2 logs minitranslate
 pm2 status
 ```
 

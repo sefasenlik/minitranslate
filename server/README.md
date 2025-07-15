@@ -157,11 +157,11 @@ sudo apt-get install -y nodejs
 npm install -g pm2
 
 # Clone/upload your server files
-cd /var/www/translation-api
+cd /var/www/minitranslate
 npm install
 
 # Start with PM2
-pm2 start server.js --name "translation-api"
+pm2 start server.js --name "minitranslate"
 pm2 startup
 pm2 save
 ```
@@ -175,7 +175,7 @@ pm2 save
 
 **Heroku:**
 ```bash
-heroku create your-translation-api
+heroku create your-minitranslate
 git push heroku main
 heroku config:set PORT=3000
 ```
@@ -195,8 +195,8 @@ CMD ["npm", "start"]
 
 Build and run:
 ```bash
-docker build -t translation-api .
-docker run -p 3000:3000 translation-api
+docker build -t minitranslate .
+docker run -p 3000:3000 minitranslate
 ```
 
 ## Configuration
@@ -257,7 +257,7 @@ curl https://your-server.com:3000/health
 
 ### Logs (with PM2)
 ```bash
-pm2 logs translation-api
+pm2 logs minitranslate
 pm2 monit
 ```
 
