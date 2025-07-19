@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChatGPT Translator</title>
-    <link rel="icon" type="image/x-icon" href="icon.ico">
+    <title>Translation Server</title>
+    <link rel="icon" type="image/x-icon" href="/icon.ico">
     <style>
         * {
             margin: 0;
@@ -19,7 +19,9 @@
             height: 100vh;
             overflow: hidden;
             min-width: 470px;
-            min-height: 600px;
+            min-height: 500px;
+            max-width: 100vw;
+            max-height: 100vh;
         }
 
         .container {
@@ -48,11 +50,11 @@
 
         .status {
             font-size: 12px;
-            color: #4f8cff;
-            background: rgba(79, 140, 255, 0.1);
+            color: #00ff88;
+            background: rgba(0, 255, 136, 0.1);
             padding: 4px 8px;
             border-radius: 4px;
-            border: 1px solid rgba(79, 140, 255, 0.3);
+            border: 1px solid rgba(0, 255, 136, 0.3);
         }
 
         .main-content {
@@ -146,7 +148,7 @@
             flex-shrink: 0;
         }
         .context-field {
-            background: #1f2531;
+            background: #173125;
             border: 1px solid #444;
             color: #ffffff;
             padding: 8px 12px;
@@ -155,147 +157,12 @@
             outline: none;
             flex: 1;
         }
-
         .context-field:focus {
-            border-color: #4f8cff;
+            border-color: #00ff88;
         }
-
         .context-field::placeholder {
             color: #666;
         }
-
-        .language-select {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #ffffff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 14px;
-            outline: none;
-            min-width: 120px;
-        }
-
-        .language-select:focus {
-            border-color: #4f8cff;
-        }
-
-        .swap-btn {
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: #ffffff;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s;
-        }
-
-        .swap-btn:hover {
-            background: #3a3a3a;
-            border-color: #555;
-        }
-
-        .translate-btn {
-            background: linear-gradient(135deg, #4f8cff, #2563eb);
-            border: none;
-            color: #ffffff;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s;
-            flex: 1;
-            max-width: 150px;
-        }
-
-        .translate-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
-        }
-
-        .translate-btn:disabled {
-            background: #444;
-            color: #888;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .loading {
-            display: none;
-            align-items: center;
-            gap: 10px;
-            color: #4f8cff;
-            font-size: 14px;
-        }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid #333;
-            border-top: 2px solid #4f8cff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error {
-            font-size: 12px;
-            background: rgba(255, 0, 0, 0.1);
-            border: 1px solid rgba(255, 0, 0, 0.3);
-            color: #ff6b6b;
-            padding: 10px;
-            border-radius: 6px;
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100%);
-            z-index: 1000;
-            max-width: 90%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .success {
-            font-size: 12px;
-            background: rgba(79, 140, 255, 0.1);
-            border: 1px solid rgba(79, 140, 255, 0.3);
-            color: #4f8cff;
-            padding: 10px;
-            border-radius: 6px;
-            display: none;
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%) translateY(-100%);
-            z-index: 1000;
-            max-width: 90%;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            opacity: 0;
-            transition: all 0.3s ease-in-out;
-        }
-
-        .error.show, .success.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
-        }
-
-        .char-count {
-            font-size: 12px;
-            color: #666;
-            text-align: right;
-            padding: 5px 20px;
-            background: #1a1a1a;
-            border-top: 1px solid #333;
-        }
-
         @media (min-width: 768px) {
             .controls {
                 flex-direction: row;
@@ -326,13 +193,144 @@
                 display: none;
             }
         }
+        .language-select {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            outline: none;
+            min-width: 120px;
+        }
+
+        .language-select:focus {
+            border-color: #00ff88;
+        }
+
+        .swap-btn {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .swap-btn:hover {
+            background: #3a3a3a;
+            border-color: #555;
+        }
+
+        .translate-btn {
+            background: linear-gradient(135deg, #00ff88, #00cc6a);
+            border: none;
+            color: #000000;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            flex: 1;
+            max-width: 150px;
+        }
+
+        .translate-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+        }
+
+        .translate-btn:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #00ff88;
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #333;
+            border-top: 2px solid #00ff88;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            font-size: 12px;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            color: #ff6b6b;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            z-index: 1000;
+            max-width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .success {
+            font-size: 12px;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            color: #00ff88;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100%);
+            z-index: 1000;
+            max-width: 90%;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .error.show, .success.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .char-count {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            padding: 5px 20px;
+            background: #1a1a1a;
+            border-top: 1px solid #333;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>ChatGPT Translator</h1>
-            <div class="status">Ready</div>
+            <h1>Translation Server</h1>
+            <div class="status">Connected</div>
         </div>
         
         <div class="error" id="errorMessage"></div>
@@ -612,7 +610,11 @@
         const targetLang = urlParams.get('tl') || 'ru';
         const text = urlParams.get('text') || '';
         const context = urlParams.get('context') || '';
-        const apiKey = urlParams.get('apikey') || '';
+        let serverUrl = urlParams.get('server') || 'http://localhost:3333';
+        const token = urlParams.get('token') || '';
+
+        // Clean up server URL - remove trailing slash
+        serverUrl = serverUrl.replace(/\/$/, '');
 
         // Initialize the interface
         document.getElementById('sourceLang').value = sourceLang;
@@ -620,16 +622,11 @@
         document.getElementById('sourceText').value = text;
         document.getElementById('contextField').value = context;
 
-        // Update status
-        if (apiKey) {
-            document.querySelector('.status').textContent = 'API Key Ready';
-        } else {
-            document.querySelector('.status').textContent = 'No API Key';
-            showError('No API key provided. Please configure the API key in MiniTranslate settings.');
-        }
+        // Update status to show server URL
+        document.querySelector('.status').textContent = `Connected to ${serverUrl}`;
 
         // Auto-translate if text is provided
-        if (text.trim() && apiKey) {
+        if (text.trim()) {
             setTimeout(() => translate(), 500);
         }
 
@@ -771,13 +768,8 @@
                 return;
             }
 
-            if (!apiKey) {
-                showError('No API key provided. Please configure the API key in MiniTranslate settings.');
-                return;
-            }
-
-            if (!apiKey.startsWith('sk-')) {
-                showError('Invalid API key format. Must start with sk-');
+            if (!token) {
+                showError('No server token provided. Please configure the server token in MiniTranslate settings.');
                 return;
             }
 
@@ -815,56 +807,35 @@
             loading.style.display = 'flex';
 
             try {
-                const sourceLanguageName = sourceLang === 'auto' ? 'the detected language' : (languages[sourceLang] || sourceLang);
-                const targetLanguageName = languages[targetLang] || targetLang;
-                
-                let prompt;
-                if (sourceLang === 'auto') {
-                    prompt = `Detect the language and translate to ${targetLanguageName}:\n${sourceText}`;
-                } else {
-                    prompt = `Translate from ${sourceLanguageName} to ${targetLanguageName}:\n${sourceText}`;
-                }
-                if (context) {
-                    prompt += `\nRequirements: ${context}`;
-                }
-                prompt += `\nOnly output the translation.`;
-
-                // Log the full request payload
-                const requestPayload = {
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        {
-                            role: 'user',
-                            content: prompt
-                        }
-                    ],
-                    max_tokens: 3000,
-                    temperature: 0.3
+                const fullUrl = `${serverUrl}/translate`;
+                const requestBody = {
+                    text: sourceText,
+                    sourceLang: sourceLang,
+                    targetLang: targetLang,
+                    context: context,
+                    token: token
                 };
-
-                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                
+                const response = await fetch(fullUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${apiKey}`
                     },
-                    body: JSON.stringify(requestPayload)
+                    body: JSON.stringify(requestBody)
                 });
 
+                const data = await response.json();
+
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `HTTP ${response.status}: ${response.statusText}`);
+                    throw new Error(data.error || `HTTP ${response.status}: ${response.statusText}`);
                 }
 
-                const data = await response.json();
-                const translation = data.choices[0]?.message?.content?.trim();
-
-                if (translation) {
-                    document.getElementById('targetText').value = translation;
+                if (data.success) {
+                    document.getElementById('targetText').value = data.translation;
                     showSuccess('Translation completed successfully!');
                     updateCharCount();
                 } else {
-                    throw new Error('No translation received from ChatGPT');
+                    throw new Error(data.error || 'Translation failed');
                 }
 
             } catch (error) {
@@ -922,7 +893,7 @@
             });
             // Add ENTER key listener for translation
             contextField.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
                     e.preventDefault();
                     translate();
                 }
@@ -935,18 +906,18 @@
             });
             // Add ENTER key listener for translation
             contextFieldDesktop.addEventListener('keydown', function(e) {
-                if (e.key === 'Enter') {
+                if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.altKey && !e.metaKey) {
                     e.preventDefault();
                     translate();
                 }
             });
         }
 
-        // Update source text field ENTER key listener
+        // Add ENTER key listener to source text field
         document.getElementById('sourceText').addEventListener('keydown', function(e) {
             if (e.ctrlKey && e.key === 'Enter') {
                 translate();
-            } else if (e.key === 'Enter') {
+            } else if (e.key === 'Enter' && !e.shiftKey && !e.altKey && !e.metaKey) {
                 e.preventDefault();
                 translate();
             }
