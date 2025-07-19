@@ -162,7 +162,6 @@ namespace MiniTranslate
         private AppSettings settings;
         private int hotKeyId = 1;
         private static readonly HttpClient httpClient = new HttpClient();
-        private Process nodeServerProcess;
         
         // Double key detection
         private DateTime lastKeyPress = DateTime.MinValue;
@@ -223,7 +222,6 @@ namespace MiniTranslate
             }
             
             UpdateTrayIconText();
-            StartNodeServer();
             
             // Hide the form initially
             WindowState = FormWindowState.Minimized;
@@ -502,50 +500,10 @@ namespace MiniTranslate
                 }
 
                 string url;
-                // Always use the embedded HTTP server for local HTML
-                int serverPort = 12345;
-                string nodeExe = "node"; // Assumes node is in PATH or bundled in app dir
-                string miniwebPath = Path.Combine(Application.StartupPath, "miniweb.js");
-
-                // Check if the server is running (try to connect)
-                bool serverRunning = false;
-                try
-                {
-                    using (var client = new System.Net.Sockets.TcpClient())
-                    {
-                        client.Connect("127.0.0.1", serverPort);
-                        serverRunning = true;
-                    }
-                }
-                catch { }
-
-                // If not running, launch it
-                if (!serverRunning && File.Exists(miniwebPath))
-                {
-                    try
-                    {
-                        var psi = new ProcessStartInfo
-                        {
-                            FileName = nodeExe,
-                            Arguments = $"\"{miniwebPath}\"",
-                            WorkingDirectory = Application.StartupPath,
-                            UseShellExecute = false,
-                            CreateNoWindow = true
-                        };
-                        Process.Start(psi);
-                        // Wait a moment for the server to start
-                        System.Threading.Thread.Sleep(500);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Failed to start embedded server: {ex.Message}", "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                }
 
                 if (settings.PreferredTranslator == TranslatorType.TranslationServer)
                 {
-                    url = $"http://localhost:{serverPort}/translation-server.html?sl={settings.SourceLanguage}&tl={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}&server={Uri.EscapeDataString(settings.TranslationServerUrl)}&token={Uri.EscapeDataString(settings.TranslationServerToken)}";
+                    url = $"{settings.TranslationServerUrl}/translation-server.html?sl={settings.SourceLanguage}&tl={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}&server={Uri.EscapeDataString(settings.TranslationServerUrl)}&token={Uri.EscapeDataString(settings.TranslationServerToken)}";
                     // If window is open, close it before opening a new one
                     if (translationServerWindowProcess != null && !translationServerWindowProcess.HasExited)
                     {
@@ -559,7 +517,7 @@ namespace MiniTranslate
                 }
                 else if (settings.PreferredTranslator == TranslatorType.ChatGPT)
                 {
-                    url = $"http://localhost:{serverPort}/translator.html?sl={settings.SourceLanguage}&tl={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}&apikey={Uri.EscapeDataString(settings.ChatGptApiKey)}";
+                    url = $"{settings.TranslationServerUrl}/translator.html?sl={settings.SourceLanguage}&tl={settings.TargetLanguage}&text={Uri.EscapeDataString(clipboardText)}&apikey={Uri.EscapeDataString(settings.ChatGptApiKey)}";
                     // If window is open, close it before opening a new one
                     if (chatGptWindowProcess != null && !chatGptWindowProcess.HasExited)
                     {
@@ -788,7 +746,6 @@ namespace MiniTranslate
 
         private void OnExit(object sender, EventArgs e)
         {
-            KillNodeServer();
             UnregisterHotKey(this.Handle, hotKeyId);
             StopClipboardListener();
             trayIcon.Visible = false;
@@ -799,7 +756,6 @@ namespace MiniTranslate
         {
             if (disposing)
             {
-                KillNodeServer();
                 UnregisterHotKey(this.Handle, hotKeyId);
                 StopClipboardListener();
                 trayIcon?.Dispose();
@@ -813,22 +769,7 @@ namespace MiniTranslate
             base.SetVisibleCore(false);
         }
 
-        private void LogToFile(string message)
-        {
-            try
-            {
-                var logPath = Path.Combine(Application.StartupPath, "minitranslate.log");
-                var timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-                var logMessage = $"[{timestamp}] {message}";
-                
-                File.AppendAllText(logPath, logMessage + Environment.NewLine);
-                Console.WriteLine(logMessage);
-            }
-            catch
-            {
-                // Ignore logging errors
-            }
-        }
+
 
         private void OnSwitchLanguages(object sender, EventArgs e)
         {
@@ -840,133 +781,7 @@ namespace MiniTranslate
             BuildTrayMenu();
         }
 
-        private void StartNodeServer()
-        {
-            try
-            {
-                // Kill any existing node processes on port 12345
-                KillExistingNodeProcesses();
-                
-                // Start the miniweb.js server
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = "node",
-                    Arguments = "miniweb.js",
-                    WorkingDirectory = Application.StartupPath,
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                };
 
-                nodeServerProcess = new Process
-                {
-                    StartInfo = processStartInfo,
-                    EnableRaisingEvents = true
-                };
-
-                // Add event handlers for output
-                nodeServerProcess.OutputDataReceived += (sender, e) => {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        LogToFile($"Node.js output: {e.Data}");
-                };
-                
-                nodeServerProcess.ErrorDataReceived += (sender, e) => {
-                    if (!string.IsNullOrEmpty(e.Data))
-                        LogToFile($"Node.js error: {e.Data}");
-                };
-
-                bool started = nodeServerProcess.Start();
-                if (started)
-                {
-                    nodeServerProcess.BeginOutputReadLine();
-                    nodeServerProcess.BeginErrorReadLine();
-                    LogToFile($"Node.js server started with PID: {nodeServerProcess.Id}");
-                    
-                    // Wait a moment and check if server is actually running
-                    System.Threading.Thread.Sleep(1000);
-                    if (IsServerRunning())
-                    {
-                        LogToFile("Node.js server is running and responding on port 12345");
-                    }
-                    else
-                    {
-                        LogToFile("Warning: Node.js process started but server is not responding on port 12345");
-                    }
-                }
-                else
-                {
-                    LogToFile("Failed to start Node.js server - process.Start() returned false");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogToFile($"Failed to start Node.js server: {ex.Message}");
-                LogToFile($"Exception details: {ex}");
-            }
-        }
-
-        private void KillExistingNodeProcesses()
-        {
-            try
-            {
-                // Kill any node processes that might be using port 12345
-                var processes = Process.GetProcessesByName("node");
-                foreach (var process in processes)
-                {
-                    try
-                    {
-                        process.Kill();
-                        process.WaitForExit(3000); // Wait up to 3 seconds
-                        LogToFile($"Killed existing node process with PID: {process.Id}");
-                    }
-                    catch (Exception ex)
-                    {
-                        LogToFile($"Failed to kill node process {process.Id}: {ex.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogToFile($"Error killing existing node processes: {ex.Message}");
-            }
-        }
-
-        private void KillNodeServer()
-        {
-            try
-            {
-                if (nodeServerProcess != null && !nodeServerProcess.HasExited)
-                {
-                    nodeServerProcess.Kill();
-                    nodeServerProcess.WaitForExit(3000); // Wait up to 3 seconds
-                    LogToFile("Node.js server killed");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogToFile($"Failed to kill Node.js server: {ex.Message}");
-            }
-        }
-
-        private bool IsServerRunning()
-        {
-            try
-            {
-                using (var client = new System.Net.Sockets.TcpClient())
-                {
-                    var result = client.BeginConnect("127.0.0.1", 12345, null, null);
-                    var success = result.AsyncWaitHandle.WaitOne(TimeSpan.FromSeconds(2));
-                    client.EndConnect(result);
-                    return success;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
 
         private void StartClipboardListener()
         {

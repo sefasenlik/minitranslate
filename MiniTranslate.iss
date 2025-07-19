@@ -15,14 +15,12 @@ SolidCompression=yes
 
 [Files]
 Source: "publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "miniweb.js"; DestDir: "{app}"; Flags: ignoreversion
-Source: "translator.html"; DestDir: "{app}"; Flags: ignoreversion
-Source: "translation-server.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "websites/translator.html"; DestDir: "{app}"; Flags: ignoreversion
+Source: "websites/translation-server.html"; DestDir: "{app}"; Flags: ignoreversion
 Source: "icon.ico"; DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "docs\CHATGPT_SETUP.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "docs\CHATGPT_API_SETUP.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "node.exe"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\MiniTranslate"; Filename: "{app}\MiniTranslate.exe"; WorkingDir: "{app}"

@@ -64,9 +64,8 @@ jobs:
     - name: Copy additional files
       run: |
         # Copy HTML files
-        copy translator.html publish\
-        copy translation-server.html publish\
-        copy miniweb.js publish\
+        copy websites/translator.html publish\
+        copy websites/translation-server.html publish\
         copy icon.ico publish\
         copy README.md publish\
         

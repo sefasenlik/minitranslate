@@ -6,7 +6,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3333;
 
 // Middleware
 app.use(cors({
@@ -17,6 +17,40 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+
+
+// Specific route for icon
+app.get('/icon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'icon.ico'));
+});
+
+// Route for favicon (alternative name)
+app.get('/favicon.ico', (req, res) => {
+    res.sendFile(path.join(__dirname, 'icon.ico'));
+});
+
+// Specific routes for HTML files
+app.get('/translation-server.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'translation-server.html'));
+});
+
+app.get('/translator.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'translator.html'));
+});
+
+// Route for admin page
+app.get('/admin.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+
+
+// Serve static HTML files (MUST come after specific routes)
+app.use('/app', express.static(__dirname));
+// Removed app.use('/', express.static(__dirname)) to prevent catching all requests
+
+
 
 // Health check endpoint
 app.get('/health', (req, res) => {

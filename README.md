@@ -169,13 +169,14 @@ For server setup instructions, see [docs/CHATGPT_API_SETUP.md](docs/CHATGPT_API_
 
 ```
 MiniTranslate/
-├── MiniTranslate.exe          # Main application
-├── miniweb.js                 # Local web server
-├── node.exe                   # Node.js runtime (for local server)
-├── translation-server.html    # Translation interface
-├── translator.html            # ChatGPT interface
-├── icon.ico                   # Application icon
-└── settings.json             # User configuration (in AppData)
+├── docs/                         # Documentation, setup guides, and usage instructions
+├── server/                       # Source code and configuration for the translation server backend
+├── websites/                     # Web-based translation interfaces and static assets
+│   ├── translation-server.html   # Web UI for Translation Server mode
+│   └── translator.html           # Web UI for ChatGPT translation mode
+├── MiniTranslate.exe             # Main Windows application executable
+├── icon.ico                      # Application icon file
+└── settings.json                 # User settings (stored in AppData, not in this directory)
 ```
 
 ## ⚙️ Configuration Files
