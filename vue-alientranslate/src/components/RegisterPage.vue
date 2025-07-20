@@ -152,7 +152,7 @@
         </div>
 
         <div class="social-login">
-          <button class="btn btn-secondary btn-full social-btn">
+          <button @click="showNotAvailablePopup" class="btn btn-secondary btn-full social-btn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
               <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
@@ -162,6 +162,13 @@
             Зарегистрироваться через Google
           </button>
         </div>
+
+        <!-- Not Available Popup -->
+        <NotAvailablePopup 
+          :show="showNotAvailable" 
+          @close="hideNotAvailablePopup"
+          message="Регистрация через Google пока недоступна. Мы работаем над интеграцией с Google OAuth."
+        />
 
         <div class="auth-footer">
           <p>Уже есть аккаунт? <a href="#" @click.prevent="goToLogin">Войти</a></p>
@@ -175,12 +182,14 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { createBackgroundText } from '../utils/backgroundText.js'
 import apiService from '../services/api.js'
+import NotAvailablePopup from './NotAvailablePopup.vue'
 
 const emit = defineEmits(['navigate'])
 
 const loading = ref(false)
 const showPassword = ref(false)
 const showConfirmPassword = ref(false)
+const showNotAvailable = ref(false)
 
 const form = reactive({
   firstName: '',
@@ -324,6 +333,14 @@ const closeAuth = () => {
   emit('navigate', 'home')
 }
 
+const showNotAvailablePopup = () => {
+  showNotAvailable.value = true
+}
+
+const hideNotAvailablePopup = () => {
+  showNotAvailable.value = false
+}
+
 // ===== Hero-style background text generator =====
 onMounted(() => {
   const authPage = document.querySelector('.auth-page')
@@ -361,8 +378,6 @@ onMounted(() => {
   border-radius: 16px;
   padding: 2.5rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 120px rgba(56,183,161,0.20), 0 0 240px rgba(56,183,161,0.10);
-  max-height: 90vh;
-  overflow-y: auto;
 }
 
 .auth-header {
