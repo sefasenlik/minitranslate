@@ -184,7 +184,7 @@ heroku config:set PORT=3000
 
 Create a `Dockerfile`:
 ```dockerfile
-FROM node:18-alpine
+FROM node:24-alpine
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -241,6 +241,46 @@ Access the admin panel at `https://your-domain.com/admin.html` to:
 After deploying your server, update your MiniTranslate application to use the API instead of the local HTML file.
 
 The server URL will be: `https://your-server.com:3000/translate`
+
+## Vue App Integration
+
+The server now includes a Vue.js application that serves as the main interface for `alientranslate.ru`. The setup includes:
+
+### Architecture
+- **Vue App**: Served on `alientranslate.ru/` (root domain)
+- **Translation Interfaces**: Still accessible on specific paths:
+  - `alientranslate.ru/translator.html`
+  - `alientranslate.ru/translation_server.html`
+
+### Docker Setup
+The Vue app is containerized and runs alongside the Node.js server:
+- **Container**: `vue-alientranslate`
+- **Network**: `shared-network` (same as other services)
+- **Build**: Multi-stage Docker build with nginx serving
+
+### Deployment
+```bash
+cd server
+docker-compose up -d
+```
+
+This will:
+1. Build the Vue app from `../vue-alientranslate`
+2. Start both the Node.js server and Vue app containers
+3. Configure nginx to route requests appropriately
+
+### Development
+For Vue app development:
+```bash
+cd vue-alientranslate
+npm run dev
+```
+
+For production build:
+```bash
+cd vue-alientranslate
+npm run build
+```
 
 ### Context Support in MiniTranslate
 - Context field appears in translation interface

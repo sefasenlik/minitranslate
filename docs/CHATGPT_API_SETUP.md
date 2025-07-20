@@ -25,7 +25,7 @@ curl -fsSL https://rpm.nodesource.com/setup_18.x | sudo bash -
 sudo yum install -y nodejs
 
 # Or using Docker (recommended)
-docker pull node:18-alpine
+docker pull node:24-alpine
 ```
 
 ### Step 2: Upload Server Files

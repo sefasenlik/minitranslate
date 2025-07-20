@@ -2,6 +2,12 @@
   <div class="auth-page" @click.self="closeAuth">
     <div class="auth-container">
       <div class="auth-card">
+        <button @click="closeAuth" class="close-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
         <div class="auth-header">
           <img src="/logo.png" alt="логотип переводчужик" class="auth-logo" />
           <h1>Вход в систему</h1>
@@ -103,21 +109,26 @@ const form = reactive({
   rememberMe: false
 })
 
+import apiService from '../services/api.js'
+
 const handleLogin = async () => {
   loading.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    const response = await apiService.login({
+      email: form.email,
+      password: form.password
+    })
     
-    // Here you would typically make an API call to authenticate
-    console.log('Login attempt:', form)
+    // Store user data
+    apiService.setCurrentUser(response.user)
     
-    // For demo purposes, just log the form data
-    alert('Login functionality would be implemented here')
+    // Navigate to home page
+    emit('navigate', 'home')
     
   } catch (error) {
     console.error('Login error:', error)
+    alert(error.message || 'Ошибка входа в систему')
   } finally {
     loading.value = false
   }
@@ -388,6 +399,30 @@ onMounted(() => {
 
 .auth-footer a:hover {
   color: #2da58c;
+}
+
+.close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #161616;
+  border: 2px solid #1e1e1e;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: #1e1e1e;
+  color: var(--text);
+  transform: scale(1.1);
 }
 
 @media (max-width: 480px) {

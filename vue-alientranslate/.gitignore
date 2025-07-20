@@ -28,3 +28,11 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+server/*.db
+server/*.sqlite
+server/*.sqlite3

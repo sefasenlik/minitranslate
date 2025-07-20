@@ -2,6 +2,12 @@
   <div class="auth-page" @click.self="closeAuth">
     <div class="auth-container">
       <div class="auth-card">
+        <button @click="closeAuth" class="close-btn">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
         <div class="auth-header">
           <img src="/logo.png" alt="логотип переводчужик" class="auth-logo" />
           <h1>Регистрация</h1>
@@ -128,7 +134,7 @@
 
           <div class="form-group">
             <label class="checkbox-label">
-              <input type="checkbox" v-model="form.agreeToTerms" required />
+              <input type="checkbox" name="agreeToTerms" v-model="form.agreeToTerms" />
               <span class="checkmark"></span>
               Я согласен с <a href="#" class="terms-link">условиями использования</a> и <a href="#" class="terms-link">политикой конфиденциальности</a>
             </label>
@@ -168,6 +174,7 @@
 <script setup>
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { createBackgroundText } from '../utils/backgroundText.js'
+import apiService from '../services/api.js'
 
 const emit = defineEmits(['navigate'])
 
@@ -285,17 +292,25 @@ const handleRegister = async () => {
   loading.value = true
   
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500))
+    const response = await apiService.register({
+      firstName: form.firstName,
+      lastName: form.lastName,
+      email: form.email,
+      password: form.password
+    })
     
-    // Here you would typically make an API call to register
-    console.log('Register attempt:', form)
+    // Store user data
+    apiService.setCurrentUser(response.user)
     
-    // For demo purposes, just log the form data
-    alert('Registration functionality would be implemented here')
+    // Show success message about email verification
+    alert('Регистрация успешна! Пожалуйста, проверьте ваш email для подтверждения аккаунта.')
+    
+    // Navigate to home page
+    emit('navigate', 'home')
     
   } catch (error) {
     console.error('Registration error:', error)
+    alert(error.message || 'Ошибка регистрации')
   } finally {
     loading.value = false
   }
@@ -639,6 +654,30 @@ onMounted(() => {
 
 .auth-footer a:hover {
   color: #2da58c;
+}
+
+.close-btn {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #161616;
+  border: 2px solid #1e1e1e;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.close-btn:hover {
+  background: #1e1e1e;
+  color: var(--text);
+  transform: scale(1.1);
 }
 
 @media (max-width: 480px) {

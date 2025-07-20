@@ -252,6 +252,48 @@ app.get('/languages', (req, res) => {
     });
 });
 
+// User registration endpoint for Vue app integration
+app.post('/register-user', async (req, res) => {
+    try {
+        const { name, surname, email, token } = req.body;
+        
+        // Validation
+        if (!name || !surname || !email || !token) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: name, surname, email, token' 
+            });
+        }
+
+        // Check if user already exists
+        if (users.some(u => u.token === token || u.email === email)) {
+            return res.status(400).json({ 
+                error: 'User with this token or email already exists' 
+            });
+        }
+
+        // Add user to the system
+        const success = addUser({ name, surname, email, token });
+        
+        if (success) {
+            res.json({ 
+                success: true, 
+                message: 'User registered successfully',
+                user: { name, surname, email, token, usage: 0 }
+            });
+        } else {
+            res.status(400).json({ 
+                error: 'Failed to register user' 
+            });
+        }
+
+    } catch (error) {
+        console.error('User registration error:', error);
+        res.status(500).json({ 
+            error: 'Internal server error' 
+        });
+    }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
     res.status(500).json({

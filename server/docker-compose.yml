@@ -26,6 +26,44 @@ services:
     networks:
       - shared-network
 
+  # Vue app backend service
+  vue-backend:
+    build: 
+      context: ../vue-alientranslate
+      dockerfile: Dockerfile.backend
+    container_name: vue-backend
+    restart: unless-stopped
+    env_file:
+      - ../vue-alientranslate/.env
+    environment:
+      - NODE_ENV=production
+      - BASE_URL=https://alientranslate.ru
+    volumes:
+      # Persist the SQLite database directory in Vue app directory
+      - ../vue-alientranslate/data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shared-network
+
+  # Vue app service (static files)
+  vue-alientranslate:
+    build: ../vue-alientranslate
+    container_name: vue-alientranslate
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - shared-network
+
   # Add nginx as the main reverse proxy
   nginx:
     image: nginx:alpine
@@ -45,6 +83,7 @@ services:
         hard: 65536
     depends_on:
       - minitranslate
+      - vue-alientranslate
     networks:
       - shared-network
 
