@@ -3,7 +3,7 @@ using System.IO;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 
-namespace MiniTranslate
+namespace AlienTranslate
 {
     public enum BrowserType
     {
@@ -50,7 +50,7 @@ namespace MiniTranslate
 
         private static readonly string SettingsPath = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "MiniTranslate",
+            "AlienTranslate",
             "settings.json");
 
         public static AppSettings Load()
@@ -66,7 +66,7 @@ namespace MiniTranslate
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to load settings: {ex.Message}. Using defaults.",
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
             return new AppSettings();
@@ -88,7 +88,7 @@ namespace MiniTranslate
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to save settings: {ex.Message}",
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

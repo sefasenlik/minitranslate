@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlienTranslate Admin Panel</title>
+    <style>
+        /* Base theme colors matching vue-alientranslate */
+        :root {
+            --bg: #101010;
+            --accent: #38b7a1;
+            --text: #ffffff;
+            --text-muted: #bbbbbb;
+            --card-bg: #161616;
+            --border: #1e1e1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .admin-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--accent), #2da58c);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .admin-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        /* Auth Section */
+        .auth-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 60vh;
+        }
+
+        .auth-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 120px rgba(56,183,161,0.20);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .auth-card h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.75rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            background: #2da58c;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* User Form */
+        .user-form {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        /* Users Table */
+        .users-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg);
+        }
+
+        .users-table th {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .users-table th:hover {
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .users-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .users-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .users-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .message.error {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: #ff6b6b;
+        }
+
+        .message.success {
+            background: rgba(56, 183, 161, 0.1);
+            border: 1px solid rgba(56, 183, 161, 0.3);
+            color: #00ff88;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .admin-header h1 {
+                font-size: 2rem;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .user-actions {
+                flex-direction: column;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+        <div class="admin-header">
+    <h1>AlienTranslate Admin Panel</h1>
+            <p>Manage users and monitor translation usage</p>
+        </div>
+
+        <!-- Auth Section -->
+        <div id="authSection" class="auth-section">
+            <div class="auth-card">
+                <h2>Admin Authentication</h2>
+                <form id="authForm">
+                    <div class="form-group">
+                        <label for="adminPassword">Admin Password</label>
+                        <input type="password" id="adminPassword" class="form-input" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <span id="authLoading" class="loading" style="display: none;"></span>
+                        <span id="authText">Login</span>
+                    </button>
+                </form>
+                <div id="authMessage"></div>
+            </div>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="adminPanel" class="admin-panel">
+            <div class="panel-header">
+                <h2>Dashboard</h2>
+                <button onclick="logout()" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">0</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsage">0</div>
+                    <div class="stat-label">Total Characters</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgUsage">0</div>
+                    <div class="stat-label">Avg Usage/User</div>
+                </div>
+    </div>
+
+            <!-- Add User Form -->
+            <div class="user-form">
+                <div class="form-title">Add New User</div>
+        <form id="addUserForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                            <input type="text" id="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="surname">Surname</label>
+                            <input type="text" id="surname" class="form-input" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input type="email" id="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="token">Token</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="token" class="form-input" required style="flex: 1;">
+                                <button type="button" onclick="generateToken()" class="btn btn-secondary" style="white-space: nowrap;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                                        <path d="M21 2v6h-6"></path>
+                                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                                        <path d="M3 22v-6h6"></path>
+                                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                                    </svg>
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <span id="addLoading" class="loading" style="display: none;"></span>
+                            <span id="addText">Add User</span>
+                        </button>
+                        <button type="button" onclick="clearForm()" class="btn btn-secondary">Clear</button>
+                    </div>
+        </form>
+                <div id="formMessage"></div>
+            </div>
+
+            <!-- Users Table -->
+            <div class="users-section">
+                <div class="section-title">User Management</div>
+                <div class="table-container">
+                    <table class="users-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th onclick="sortUsers('name')">Name</th>
+                    <th onclick="sortUsers('surname')">Surname</th>
+                    <th onclick="sortUsers('email')">Email</th>
+                    <th onclick="sortUsers('token')">Token</th>
+                    <th onclick="sortUsers('usage')">Usage (chars)</th>
+                                <th>Actions</th>
+                </tr>
+            </thead>
+                        <tbody id="usersTableBody"></tbody>
+        </table>
+    </div>
+</div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Edit User</h3>
+                <button class="close-btn" onclick="closeEditModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <form id="editUserForm">
+                <input type="hidden" id="editUserId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editName">Name</label>
+                        <input type="text" id="editName" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSurname">Surname</label>
+                        <input type="text" id="editSurname" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editEmail">Email</label>
+                        <input type="email" id="editEmail" class="form-input" required>
+                    </div>
+                                            <div class="form-group">
+                            <label for="editToken">Token</label>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <input type="text" id="editToken" class="form-input" required style="flex: 1;">
+                                <button type="button" onclick="generateEditToken()" class="btn btn-secondary" style="white-space: nowrap;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 0.25rem;">
+                                        <path d="M21 2v6h-6"></path>
+                                        <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
+                                        <path d="M3 22v-6h6"></path>
+                                        <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
+                                    </svg>
+                                    Generate
+                                </button>
+                            </div>
+                        </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editUsage">Usage (chars)</label>
+                        <input type="number" id="editUsage" class="form-input" required>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <span id="editLoading" class="loading" style="display: none;"></span>
+                        <span id="editText">Update User</span>
+                    </button>
+                    <button type="button" onclick="closeEditModal()" class="btn btn-secondary">Cancel</button>
+                </div>
+            </form>
+            <div id="editMessage"></div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Delete</h3>
+                <button class="close-btn" onclick="closeDeleteModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+            <div class="form-actions">
+                <button onclick="confirmDelete()" class="btn btn-danger">
+                    <span id="deleteLoading" class="loading" style="display: none;"></span>
+                    <span id="deleteText">Delete User</span>
+                </button>
+                <button onclick="closeDeleteModal()" class="btn btn-secondary">Cancel</button>
+            </div>
+            <div id="deleteMessage"></div>
+        </div>
+    </div>
+
+<script>
+        let adminToken = '';
+let users = [];
+let sortKey = 'usage';
+let sortDesc = true;
+        let userToDelete = null;
+
+        // Auth functions
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const password = document.getElementById('adminPassword').value;
+            
+            setLoading('auth', true);
+            clearMessage('auth');
+            
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: { Authorization: password }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Invalid password');
+                }
+                
+                users = await response.json();
+                adminToken = password;
+                showAdminPanel();
+                updateStats();
+                renderUsers();
+                
+            } catch (error) {
+                showMessage('auth', 'Invalid password', 'error');
+            } finally {
+                setLoading('auth', false);
+            }
+        });
+
+        function logout() {
+            adminToken = '';
+            users = [];
+            showAuthSection();
+            document.getElementById('adminPassword').value = '';
+        }
+
+        function showAuthSection() {
+            document.getElementById('authSection').style.display = 'flex';
+            document.getElementById('adminPanel').style.display = 'none';
+        }
+
+        function showAdminPanel() {
+            document.getElementById('authSection').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+        }
+
+        // User management functions
+        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                name: document.getElementById('name').value.trim(),
+                surname: document.getElementById('surname').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                token: document.getElementById('token').value.trim()
+            };
+            
+            setLoading('add', true);
+            clearMessage('form');
+            
+            try {
+                const response = await fetch('/admin/adduser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: adminToken
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('form', 'User added successfully!', 'success');
+                document.getElementById('addUserForm').reset();
+                await loadUsers();
+                
+            } catch (error) {
+                showMessage('form', error.message, 'error');
+            } finally {
+                setLoading('add', false);
+            }
+        });
+
+        async function loadUsers() {
+            try {
+                const response = await fetch('/admin/users', {
+                    headers: { Authorization: adminToken }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to load users');
+                }
+                
+                users = await response.json();
+                updateStats();
+                renderUsers();
+                
+            } catch (error) {
+                showMessage('form', 'Failed to load users: ' + error.message, 'error');
+            }
+        }
+
+        function updateStats() {
+            const totalUsers = users.length;
+            const totalUsage = users.reduce((sum, user) => sum + (user.usage || 0), 0);
+            const avgUsage = totalUsers > 0 ? Math.round(totalUsage / totalUsers) : 0;
+            
+            document.getElementById('totalUsers').textContent = totalUsers;
+            document.getElementById('totalUsage').textContent = totalUsage.toLocaleString();
+            document.getElementById('avgUsage').textContent = avgUsage.toLocaleString();
+}
+
+function renderUsers() {
+            const tbody = document.getElementById('usersTableBody');
+    tbody.innerHTML = '';
+            
+            const sorted = [...users].sort((a, b) => {
+                if (sortKey === 'usage') {
+                    return sortDesc ? (b.usage || 0) - (a.usage || 0) : (a.usage || 0) - (b.usage || 0);
+                }
+                const aVal = a[sortKey] || '';
+                const bVal = b[sortKey] || '';
+                return sortDesc ? bVal.localeCompare(aVal) : aVal.localeCompare(bVal);
+            });
+            
+            sorted.forEach(user => {
+        const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${user.name}</td>
+                    <td>${user.surname}</td>
+                    <td>${user.email}</td>
+                    <td>${user.token}</td>
+                    <td>${(user.usage || 0).toLocaleString()}</td>
+                    <td>
+                        <div class="user-actions">
+                            <button onclick="editUser('${user.token}')" class="btn btn-secondary btn-small">Edit</button>
+                            <button onclick="deleteUser('${user.token}')" class="btn btn-danger btn-small">Delete</button>
+                        </div>
+                    </td>
+                `;
+        tbody.appendChild(tr);
+            });
+}
+
+function sortUsers(key) {
+            if (sortKey === key) {
+                sortDesc = !sortDesc;
+            } else {
+                sortKey = key;
+                sortDesc = true;
+            }
+    renderUsers();
+}
+
+        function clearForm() {
+            document.getElementById('addUserForm').reset();
+            clearMessage('form');
+        }
+
+        // Edit user functions
+        function editUser(token) {
+            const user = users.find(u => u.token === token);
+            if (!user) return;
+            
+            document.getElementById('editUserId').value = user.token;
+            document.getElementById('editName').value = user.name;
+            document.getElementById('editSurname').value = user.surname;
+            document.getElementById('editEmail').value = user.email;
+            document.getElementById('editToken').value = user.token;
+            document.getElementById('editUsage').value = user.usage || 0;
+            
+            document.getElementById('editModal').classList.add('show');
+            clearMessage('edit');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('show');
+        }
+
+        document.getElementById('editUserForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+            
+            const formData = {
+                oldToken: document.getElementById('editUserId').value,
+                name: document.getElementById('editName').value.trim(),
+                surname: document.getElementById('editSurname').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                token: document.getElementById('editToken').value.trim(),
+                usage: parseInt(document.getElementById('editUsage').value) || 0
+            };
+            
+            setLoading('edit', true);
+            clearMessage('edit');
+            
+            try {
+                const response = await fetch('/admin/updateuser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: adminToken
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('edit', 'User updated successfully!', 'success');
+                closeEditModal();
+                await loadUsers();
+                
+            } catch (error) {
+                showMessage('edit', error.message, 'error');
+            } finally {
+                setLoading('edit', false);
+            }
+        });
+
+        // Delete user functions
+        function deleteUser(token) {
+            userToDelete = token;
+            document.getElementById('deleteModal').classList.add('show');
+            clearMessage('delete');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.remove('show');
+            userToDelete = null;
+        }
+
+        async function confirmDelete() {
+            if (!userToDelete) return;
+            
+            setLoading('delete', true);
+            clearMessage('delete');
+            
+            try {
+                const response = await fetch('/admin/deleteuser', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: adminToken
+                    },
+                    body: JSON.stringify({ token: userToDelete })
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                
+                showMessage('delete', 'User deleted successfully!', 'success');
+                closeDeleteModal();
+                await loadUsers();
+                
+            } catch (error) {
+                showMessage('delete', error.message, 'error');
+            } finally {
+                setLoading('delete', false);
+            }
+        }
+
+        // Utility functions
+        function setLoading(type, loading) {
+            const loadingEl = document.getElementById(`${type}Loading`);
+            const textEl = document.getElementById(`${type}Text`);
+            
+            if (loading) {
+                loadingEl.style.display = 'inline-block';
+                textEl.style.display = 'none';
+            } else {
+                loadingEl.style.display = 'none';
+                textEl.style.display = 'inline';
+            }
+        }
+
+        function showMessage(type, message, typeClass) {
+            const messageEl = document.getElementById(`${type}Message`);
+            messageEl.textContent = message;
+            messageEl.className = `message ${typeClass}`;
+        }
+
+        function clearMessage(type) {
+            const messageEl = document.getElementById(`${type}Message`);
+            messageEl.textContent = '';
+            messageEl.className = '';
+        }
+
+        // Token generation functions
+        function generateToken() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 16; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('token').value = result;
+        }
+
+        function generateEditToken() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let result = '';
+            for (let i = 0; i < 16; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('editToken').value = result;
+        }
+
+        // Initialize
+        showAuthSection();
+</script>
+</body>
+</html> 

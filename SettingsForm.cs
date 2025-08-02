@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Win32;
 
-namespace MiniTranslate
+namespace AlienTranslate
 {
     public partial class SettingsForm : Form
     {
@@ -47,7 +47,7 @@ namespace MiniTranslate
         private const int MOD_SHIFT = 0x0004;
         private const int MOD_WIN = 0x0008;
 
-        private const string AppName = "MiniTranslate";
+        private const string AppName = "AlienTranslate";
         private static readonly RegistryKey StartupRegistryKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
 
         public SettingsForm(AppSettings currentSettings)
@@ -75,7 +75,7 @@ namespace MiniTranslate
 
         private void InitializeComponent()
         {
-            this.Text = "MiniTranslate Settings";
+            this.Text = "AlienTranslate Settings";
             this.Size = new Size(520, 650);
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
@@ -570,7 +570,7 @@ namespace MiniTranslate
                 if (string.IsNullOrEmpty(clipboardText))
                 {
                     MessageBox.Show("No text found in clipboard to test translation. Copy some text and try again.", 
-                        "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -580,7 +580,7 @@ namespace MiniTranslate
                 if (sourceItem == null || targetItem == null)
                 {
                     MessageBox.Show("Please select both source and target languages.", 
-                        "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
@@ -609,7 +609,7 @@ namespace MiniTranslate
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Failed to open: {ex.Message}", "MiniTranslate", 
+                MessageBox.Show($"Failed to open: {ex.Message}", "AlienTranslate", 
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -775,21 +775,21 @@ namespace MiniTranslate
             if (sourceLanguageCombo.SelectedItem == null || targetLanguageCombo.SelectedItem == null)
             {
                 MessageBox.Show("Please select both source and target languages.", 
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             
             if (translatorComboBox.SelectedIndex == -1)
             {
                 MessageBox.Show("Please select a translation service.", 
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             // Validate hotkey
             if (keyComboBox.SelectedItem == null)
             {
-                MessageBox.Show("Please select a key for the hotkey.", "MiniTranslate", 
+                MessageBox.Show("Please select a key for the hotkey.", "AlienTranslate", 
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -797,7 +797,7 @@ namespace MiniTranslate
             if (!ctrlCheckBox.Checked && !altCheckBox.Checked && !shiftCheckBox.Checked && !winCheckBox.Checked)
             {
                 MessageBox.Show("Please select at least one modifier key (Ctrl, Alt, Shift, or Win).", 
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 

@@ -264,4 +264,9 @@ Thumbs.db
 publish/
 *.exe
 *.pdb
-MiniTranslate.exe 
+*.zip
+AlienTranslate.exe
+
+# Confidential files
+*.env
+*.pem

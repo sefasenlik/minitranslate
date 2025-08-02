@@ -1,6 +1,6 @@
 # Translation Server Setup Guide (Developer)
 
-Technical guide for setting up a custom translation server to work with MiniTranslate's "Translation Server" option with context-aware translations and user management.
+Technical guide for setting up a custom translation server to work with AlienTranslate's "Translation Server" option with context-aware translations and user management.
 
 ## Prerequisites
 
@@ -32,8 +32,8 @@ docker pull node:24-alpine
 
 ```bash
 # Create server directory
-mkdir -p /var/www/minitranslate
-cd /var/www/minitranslate
+mkdir -p /var/www/alientranslate
+cd /var/www/alientranslate
 
 # Upload server files from the 'server' folder
 ```
@@ -83,7 +83,7 @@ docker-compose up -d
 npm install -g pm2
 
 # Start the server
-pm2 start server.js --name "minitranslate"
+pm2 start server.js --name "alientranslate"
 
 # Save PM2 configuration
 pm2 save
@@ -220,7 +220,7 @@ RATE_LIMIT_MAX_REQUESTS=100  # 100 requests per window
 ### PM2 Monitoring
 ```bash
 pm2 monit
-pm2 logs minitranslate
+pm2 logs alientranslate
 pm2 status
 ```
 
@@ -269,15 +269,15 @@ curl -X POST https://your-domain.com/translate \
   }'
 ```
 
-## MiniTranslate Integration
+## AlienTranslate Integration
 
-After server deployment, configure MiniTranslate:
+After server deployment, configure AlienTranslate:
 
 1. Set `PreferredTranslator` to `TranslatorType.TranslationServer`
 2. Set `TranslationServerUrl` to your server URL
 3. Set `TranslationServerToken` to your authentication token
 
-### Context Support in MiniTranslate
+### Context Support in AlienTranslate
 - Context field appears in translation interface
 - Context is automatically passed to server
 - Server processes context for more accurate translations
@@ -309,7 +309,7 @@ After server deployment, configure MiniTranslate:
 ### Context Not Working
 - Verify context is being passed in requests
 - Check server logs for context processing
-- Ensure context field is visible in MiniTranslate interface
+- Ensure context field is visible in AlienTranslate interface
 
 ### User Management Issues
 - Check admin panel accessibility

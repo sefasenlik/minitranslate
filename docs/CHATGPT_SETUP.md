@@ -1,11 +1,11 @@
 # ChatGPT API Key Setup Guide (Developer)
 
-Technical guide for obtaining and configuring ChatGPT API keys for MiniTranslate's "ChatGPT Translator" option with context-aware translations.
+Technical guide for obtaining and configuring ChatGPT API keys for AlienTranslate's "ChatGPT Translator" option with context-aware translations.
 
 ## Prerequisites
 
 - OpenAI account with billing enabled
-- MiniTranslate application installed
+- AlienTranslate application installed
 - Internet connection (ChatGPT API is blocked in Russia)
 
 ## Getting ChatGPT API Key
@@ -23,13 +23,13 @@ Technical guide for obtaining and configuring ChatGPT API keys for MiniTranslate
 ### Step 3: Generate API Key
 1. Go to [API Keys](https://platform.openai.com/api-keys)
 2. Click "Create new secret key"
-3. Enter key name (e.g., "MiniTranslate")
+3. Enter key name (e.g., "AlienTranslate")
 4. Copy the generated key (starts with `sk-`)
 5. Store securely - you won't see it again
 
 ## API Key Configuration
 
-### In MiniTranslate Application
+### In AlienTranslate Application
 1. Right-click tray icon → Settings
 2. Select "ChatGPT Translator" as preferred translator
 3. Enter API key in "ChatGPT API Key" field
@@ -43,7 +43,7 @@ public string ChatGptApiKey { get; set; } = "sk-your-api-key-here";
 
 ## Context-Aware Translations
 
-MiniTranslate's ChatGPT Translator supports context input for more accurate translations. This feature allows users to provide additional information about their translation requirements.
+AlienTranslate's ChatGPT Translator supports context input for more accurate translations. This feature allows users to provide additional information about their translation requirements.
 
 ### Context Features
 - **Speaker Context**: Specify male/female speaker, formal/informal tone
@@ -77,7 +77,7 @@ MiniTranslate's ChatGPT Translator supports context input for more accurate tran
 
 ## Language Support
 
-MiniTranslate's ChatGPT Translator supports **35+ languages** including:
+AlienTranslate's ChatGPT Translator supports **35+ languages** including:
 
 **European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Latvian, Lithuanian, Hungarian, Romanian, Croatian, Greek
 
@@ -92,7 +92,7 @@ MiniTranslate's ChatGPT Translator supports **35+ languages** including:
 2. Enter your API key
 3. Test with simple translation prompt
 
-### Using MiniTranslate
+### Using AlienTranslate
 1. Configure API key in Settings
 2. Use "Test Translation" button
 3. Check for successful response

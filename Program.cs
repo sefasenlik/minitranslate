@@ -1,7 +1,7 @@
 using System;
 using System.Windows.Forms;
 
-namespace MiniTranslate
+namespace AlienTranslate
 {
     internal static class Program
     {
@@ -13,7 +13,7 @@ namespace MiniTranslate
             
             // Ensure only one instance is running
             bool createdNew;
-            using (var mutex = new System.Threading.Mutex(true, "MiniTranslateApp", out createdNew))
+            using (var mutex = new System.Threading.Mutex(true, "AlienTranslateApp", out createdNew))
             {
                 if (createdNew)
                 {
@@ -21,8 +21,8 @@ namespace MiniTranslate
                 }
                 else
                 {
-                    MessageBox.Show("MiniTranslate is already running. Check the system tray.", 
-                        "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("AlienTranslate is already running. Check the system tray.", 
+                        "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }

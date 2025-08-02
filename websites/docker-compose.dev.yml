@@ -1,0 +1,44 @@
+services:
+  # Vue.js development server
+  vue-dev:
+    build: 
+      context: /var/www/vue-alientranslate
+      target: development
+    container_name: vue-dev
+    ports:
+      - "5173:5173"  # Vite dev server
+      - "3001:3001"  # Backend API
+    volumes:
+      - /var/www/vue-alientranslate:/app
+      - /app/node_modules
+      - /var/www/vue-alientranslate/data:/app/data
+    environment:
+      - NODE_ENV=development
+      - BASE_URL=http://localhost:5173
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+  # Translation server
+  translation-server:
+    build: 
+      context: /var/www/translation-server
+      target: development
+    container_name: translation-server-dev
+    ports:
+      - "3333:3333"
+    volumes:
+      - /var/www/translation-server:/app
+      - /app/node_modules
+      - /var/www/translation-server/data:/app/data
+      - /var/www/translation-server/logs:/app/logs
+      - /var/www/vue-alientranslate/releases:/releases
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    driver: bridge

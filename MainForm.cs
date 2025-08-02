@@ -12,7 +12,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 
-namespace MiniTranslate
+namespace AlienTranslate
 {
     public static class LanguageDetector
     {
@@ -231,7 +231,7 @@ namespace MiniTranslate
 
         private void InitializeComponent()
         {
-            this.Text = "MiniTranslate";
+            this.Text = "AlienTranslate";
             this.Size = new Size(1, 1);
             this.FormBorderStyle = FormBorderStyle.None;
             this.ShowInTaskbar = false;
@@ -242,7 +242,7 @@ namespace MiniTranslate
             trayMenu = new ContextMenuStrip();
             trayIcon = new NotifyIcon()
             {
-                Text = "MiniTranslate", // Set initial placeholder text
+                Text = "AlienTranslate", // Set initial placeholder text
                 Icon = LoadCustomIcon(),
                 ContextMenuStrip = trayMenu,
                 Visible = true
@@ -393,7 +393,7 @@ namespace MiniTranslate
                     translatorName = "Yandex";
                     break;
             }
-            trayIcon.Text = $"MiniTranslate - {hotkeyText} to translate clipboard ({settings.SourceLanguage}→{settings.TargetLanguage}) via {translatorName}";
+            trayIcon.Text = $"AlienTranslate - {hotkeyText} to translate clipboard ({settings.SourceLanguage}→{settings.TargetLanguage}) via {translatorName}";
         }
 
         private string GetHotkeyDisplayString()
@@ -431,7 +431,7 @@ namespace MiniTranslate
                 if (!RegisterHotKey(this.Handle, hotKeyId, settings.HotkeyModifiers, settings.HotkeyKey))
                 {
                     MessageBox.Show($"Failed to register hotkey {GetHotkeyDisplayString()}. It might be already in use.",
-                        "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             UpdateTrayIcon();
@@ -479,7 +479,7 @@ namespace MiniTranslate
                 if (string.IsNullOrEmpty(clipboardText))
                 {
                     MessageBox.Show("No text found in clipboard to translate.", 
-                        "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 
@@ -549,7 +549,7 @@ namespace MiniTranslate
             catch (Exception ex)
             {
                 MessageBox.Show($"Failed to open: {ex.Message}",
-                    "MiniTranslate", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "AlienTranslate", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -571,7 +571,7 @@ namespace MiniTranslate
 
         private bool TryOpenInAppModeWithProcess(string url, out Process launchedProcess)
         {
-            string tempUserDataDir = Path.Combine(Path.GetTempPath(), "MiniTranslate_" + Guid.NewGuid().ToString("N"));
+            string tempUserDataDir = Path.Combine(Path.GetTempPath(), "AlienTranslate_" + Guid.NewGuid().ToString("N"));
             launchedProcess = null;
             switch (settings.PreferredBrowser)
             {

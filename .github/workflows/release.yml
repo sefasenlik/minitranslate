@@ -14,7 +14,7 @@ on:
       release_title:
         description: 'Release title'
         required: false
-        default: 'MiniTranslate Release'
+        default: 'AlienTranslate Release'
         type: string
       release_notes:
         description: 'Release notes (optional)'
@@ -78,22 +78,22 @@ jobs:
     - name: Create ZIP package
       run: |
         # Create a ZIP file with all necessary files
-        Compress-Archive -Path "publish\*" -DestinationPath "MiniTranslate-Release.zip" -Force
+        Compress-Archive -Path "publish\*" -DestinationPath "AlienTranslate-Release.zip" -Force
     
     - name: List files for debugging
       run: |
         echo "Files in publish directory:"
         Get-ChildItem -Path "publish" -Recurse | ForEach-Object { Write-Host $_.FullName }
         echo "ZIP file created:"
-        Get-ChildItem -Path "MiniTranslate-Release.zip"
+        Get-ChildItem -Path "AlienTranslate-Release.zip"
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
         tag_name: ${{ github.event.inputs.release_version || github.ref_name }}
-        name: ${{ github.event.inputs.release_title || 'MiniTranslate Release' }}
+        name: ${{ github.event.inputs.release_title || 'AlienTranslate Release' }}
         body: |
-          ## MiniTranslate Release
+          ## AlienTranslate Release
           
           ${{ github.event.inputs.release_notes || 'Bug fixes and improvements' }}
           
@@ -105,16 +105,16 @@ jobs:
           ### Installation Instructions
           
           **Option 1: Download ZIP Package (Recommended)**
-          1. Download `MiniTranslate-Release.zip`
+          1. Download `AlienTranslate-Release.zip`
           2. Extract all files to a folder
-          3. Run `MiniTranslate.exe`
+          3. Run `AlienTranslate.exe`
           4. Configure your preferred translation service
           
           **Option 2: Download Individual Files**
           If you prefer to download individual files, download all files from the release.
           
           ### Required Files
-          - `MiniTranslate.exe` - Main application
+          - `AlienTranslate.exe` - Main application
           - `*.dll` files - .NET runtime libraries
           - `*.json` files - Configuration files
           - `*.html` files - Translation interfaces
@@ -133,8 +133,8 @@ jobs:
           - Windows 10/11
           - No additional .NET installation required (self-contained)
         files: |
-          MiniTranslate-Release.zip
-          publish/MiniTranslate.exe
+          AlienTranslate-Release.zip
+          publish/AlienTranslate.exe
           publish/*.dll
           publish/*.json
           publish/*.html

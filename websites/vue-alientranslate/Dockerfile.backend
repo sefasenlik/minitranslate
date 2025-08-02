@@ -1,0 +1,35 @@
+# Multi-platform backend Dockerfile
+FROM --platform=$BUILDPLATFORM node:24-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install all dependencies (server might need dev dependencies)
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Create data directory with proper permissions (works on both Linux and Windows)
+RUN mkdir -p /app/data && \
+    chmod 777 /app/data
+
+# Create non-root user for better security (works on both platforms)
+RUN addgroup -g 1001 -S nodejs 2>/dev/null || true && \
+    adduser -S nodejs -u 1001 2>/dev/null || true
+
+# Switch to non-root user
+USER nodejs
+
+# Expose port
+EXPOSE 3001
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3001/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+
+# Start the backend server
+CMD ["npm", "run", "server"] 

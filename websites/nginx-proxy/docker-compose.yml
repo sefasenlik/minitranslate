@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: public-nginx
+    network_mode: host
+    volumes:
+      - /etc/letsencrypt/live/sefa.name.tr/fullchain.pem:/etc/nginx/ssl/cert.pem:ro
+      - /etc/letsencrypt/live/sefa.name.tr/privkey.pem:/etc/nginx/ssl/key.pem:ro
+      - ./conf.d:/etc/nginx/conf.d:ro
+    restart: unless-stopped

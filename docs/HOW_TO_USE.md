@@ -1,4 +1,4 @@
-# MiniTranslate - Complete User Guide
+# AlienTranslate - Complete User Guide
 
 A lightweight utility for instant, hotkey-based text translation with multiple translation service options and context-aware translations.
 
@@ -19,14 +19,14 @@ A lightweight utility for instant, hotkey-based text translation with multiple t
 
 ## Quick Start
 
-1. **Start the App**: Double-click `MiniTranslate.exe` - a black and yellow icon will appear in your system tray (bottom-right corner)
+1. **Start the App**: Double-click `AlienTranslate.exe` - a black and yellow icon will appear in your system tray (bottom-right corner)
 2. **Copy Text**: Highlight text in any application (browser, PDF, code editor, etc.) and press `Ctrl+C`
 3. **Press Hotkey**: Press the global hotkey (default is `Ctrl+Q`, or use `Ctrl+C+C` like DeepL)
 4. **Get Translation**: A translation window will appear with your translated text
 
 ## Translation Services
 
-MiniTranslate supports four different translation services. Each has its own advantages:
+AlienTranslate supports four different translation services. Each has its own advantages:
 
 ### 1. Translation Server (Recommended)
 **Best for**: High-quality translations, works worldwide, secure API key storage, context-aware translations
@@ -196,7 +196,7 @@ Right-click the tray icon and select "Settings" for full configuration:
 
 ### Language Support
 
-MiniTranslate supports **35+ languages** including:
+AlienTranslate supports **35+ languages** including:
 
 **European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Serbian, Lithuanian, Hungarian, Romanian, Croatian, Greek
 
@@ -262,13 +262,13 @@ The app automatically detects text scripts and suggests optimal language pairs:
 
 ### Method 1: Using Uninstaller
 1. Go to Control Panel → Programs and Features
-2. Find "MiniTranslate" and click "Uninstall"
+2. Find "AlienTranslate" and click "Uninstall"
 3. Follow the uninstall wizard
 
 ### Method 2: Manual Removal
 1. **Close the app**: Right-click the tray icon and select "Exit"
 2. **Delete files**: Remove the folder where the application is installed
-3. **Remove settings**: Delete `%APPDATA%\MiniTranslate` folder to remove saved settings
+3. **Remove settings**: Delete `%APPDATA%\AlienTranslate` folder to remove saved settings
 4. **Remove startup**: If enabled, uncheck "Run at Windows startup" before exiting
 
 ## Features
@@ -292,7 +292,7 @@ The app automatically detects text scripts and suggests optimal language pairs:
 - **Size**: ~139MB (self-contained executable)
 - **Requirements**: Windows 10/11 (no .NET installation required)
 - **Memory Usage**: ~50MB RAM when running
-- **Settings Location**: `%APPDATA%\MiniTranslate\settings.json`
+- **Settings Location**: `%APPDATA%\AlienTranslate\settings.json`
 - **Node.js**: Included executable for local web server functionality
 
 ## Support
@@ -300,7 +300,7 @@ The app automatically detects text scripts and suggests optimal language pairs:
 ### Getting Help
 1. **Check this guide** for common issues and solutions
 2. **Test your settings** using the "Test Translation" button
-3. **Reset to defaults** by deleting the settings file at `%APPDATA%\MiniTranslate\settings.json`
+3. **Reset to defaults** by deleting the settings file at `%APPDATA%\AlienTranslate\settings.json`
 
 ### Translation Server Support
 - **Email**: senliksefa@gmail.com for server token requests

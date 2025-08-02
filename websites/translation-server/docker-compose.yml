@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  alientranslate:
+    build: .
+    container_name: alientranslate
+    ports:
+      - "3333:3333"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    volumes:
+      - ./logs:/app/logs
+      # Persist users.json file
+      - ./data/users.json:/app/data/users.json

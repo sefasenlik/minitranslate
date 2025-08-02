@@ -1,6 +1,6 @@
-# MiniTranslate - Advanced Translation Utility
+# AlienTranslate - Advanced Translation Utility
 
-A powerful Windows utility that provides instant, high-quality translations using global keyboard shortcuts. MiniTranslate rivals DeepL in translation quality while offering unique features like regional accessibility, confidential server-side processing, and context-aware translations.
+A powerful Windows utility that provides instant, high-quality translations using global keyboard shortcuts. AlienTranslate rivals DeepL in translation quality while offering unique features like regional accessibility, confidential server-side processing, and context-aware translations.
 
 
 <img src="https://i.postimg.cc/CLQnR8G8/Mini-Translate-Sample-Translation.png" width="800" />
@@ -53,7 +53,7 @@ A powerful Windows utility that provides instant, high-quality translations usin
 - Node.js executable (included in application directory)
 
 ### Installation
-1. **Download**: Get the `MiniTranslateSetup.exe` installer from the [Releases](../../releases) page
+1. **Download**: Get the `AlienTranslateSetup.exe` installer from the [Releases](../../releases) page
 2. **Install**: Run the installer and follow the setup wizard
 3. **Launch**: The application will start automatically after installation
 
@@ -106,7 +106,7 @@ For server setup instructions, see [docs/CHATGPT_API_SETUP.md](docs/CHATGPT_API_
 
 ## 🌍 Language Support
 
-MiniTranslate supports **35+ languages** including:
+AlienTranslate supports **35+ languages** including:
 
 **European Languages**: English, Russian, Spanish, French, German, Italian, Portuguese, Polish, Dutch, Swedish, Danish, Norwegian, Finnish, Czech, Slovak, Slovenian, Estonian, Latvian, Lithuanian, Hungarian, Romanian, Croatian, Greek
 
@@ -168,13 +168,13 @@ For server setup instructions, see [docs/CHATGPT_API_SETUP.md](docs/CHATGPT_API_
 ## 📁 File Structure
 
 ```
-MiniTranslate/
+AlienTranslate/
 ├── docs/                         # Documentation, setup guides, and usage instructions
-├── server/                       # Source code and configuration for the translation server backend
+├── alientranslate-server/         # Source code and configuration for the translation server backend
 ├── websites/                     # Web-based translation interfaces and static assets
 │   ├── translation-server.html   # Web UI for Translation Server mode
 │   └── translator.html           # Web UI for ChatGPT translation mode
-├── MiniTranslate.exe             # Main Windows application executable
+├── AlienTranslate.exe             # Main Windows application executable
 ├── icon.ico                      # Application icon file
 └── settings.json                 # User settings (stored in AppData, not in this directory)
 ```
@@ -182,12 +182,12 @@ MiniTranslate/
 ## ⚙️ Configuration Files
 
 ### Settings Location
-- **Path**: `%APPDATA%\MiniTranslate\settings.json`
+- **Path**: `%APPDATA%\AlienTranslate\settings.json`
 - **Format**: JSON configuration file
 - **Backup**: Automatically created on first run
 
 ### Log Files
-- **Location**: `minitranslate.log` (in application directory)
+- **Location**: `alientranslate.log` (in application directory)
 - **Content**: Server startup/shutdown, translation attempts, errors
 - **Rotation**: Manual cleanup required
 
@@ -217,8 +217,8 @@ MiniTranslate/
 - **API Key Problems**: Validate ChatGPT API key and billing status
 
 ### Debug Information
-- **Log Files**: Check `minitranslate.log` for detailed error information
-- **Settings**: Verify configuration in `%APPDATA%\MiniTranslate\settings.json`
+- **Log Files**: Check `alientranslate.log` for detailed error information
+- **Settings**: Verify configuration in `%APPDATA%\AlienTranslate\settings.json`
 - **Server Status**: Use `curl http://localhost:12345` to test local server
 
 ## 📄 License
@@ -241,8 +241,8 @@ For support, please:
 
 Nina Sitkina *(QA Tester)*
 
-Thank you to all users who provided feedback and suggestions that led to this context-aware translation feature. Your input helps make MiniTranslate better with every release!
+Thank you to all users who provided feedback and suggestions that led to this context-aware translation feature. Your input helps make AlienTranslate better with every release!
 
 ---
 
-**MiniTranslate** - Making translation effortless, one hotkey at a time! 🚀
+**AlienTranslate** - Making translation effortless, one hotkey at a time! 🚀
